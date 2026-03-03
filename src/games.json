@@ -1,0 +1,44 @@
+[
+  {
+    "id": "1",
+    "title": "2048",
+    "description": "Join the numbers and get to the 2048 tile!",
+    "url": "https://play2048.co/",
+    "thumbnail": "https://picsum.photos/seed/2048/400/300"
+  },
+  {
+    "id": "2",
+    "title": "Tetris",
+    "description": "The classic block-stacking puzzle game.",
+    "url": "https://tetris.com/play-tetris",
+    "thumbnail": "https://picsum.photos/seed/tetris/400/300"
+  },
+  {
+    "id": "3",
+    "title": "Snake",
+    "description": "Classic snake game. Eat the apples and grow longer.",
+    "url": "https://www.google.com/logos/2010/pacman10-i.html",
+    "thumbnail": "https://picsum.photos/seed/snake/400/300"
+  },
+  {
+    "id": "4",
+    "title": "Dino Run",
+    "description": "The famous offline chrome dino game.",
+    "url": "https://chromedino.com/",
+    "thumbnail": "https://picsum.photos/seed/dino/400/300"
+  },
+  {
+    "id": "5",
+    "title": "Flappy Bird",
+    "description": "Flap your wings and avoid the pipes.",
+    "url": "https://flappybird.io/",
+    "thumbnail": "https://picsum.photos/seed/flappy/400/300"
+  },
+  {
+    "id": "6",
+    "title": "Pac-Man",
+    "description": "Classic arcade action. Avoid the ghosts!",
+    "url": "https://www.google.com/logos/2010/pacman10-i.html",
+    "thumbnail": "https://picsum.photos/seed/pacman/400/300"
+  }
+]
