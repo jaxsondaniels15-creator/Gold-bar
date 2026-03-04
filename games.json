@@ -5,5 +5,12 @@
     "description": "A fun, chaotic 2-player basketball game with random physics. Score baskets by jumping and swinging your arms!",
     "url": "https://basketrandom.github.io/",
     "thumbnail": "https://picsum.photos/seed/basket-random/400/300"
+  },
+  {
+    "id": "bloxd-io",
+    "title": "Bloxd.io",
+    "description": "A Minecraft-inspired multiplayer game with various modes like survival, creative, and parkour. Build, explore, and compete with others in a blocky world.",
+    "url": "https://bloxd.io/",
+    "thumbnail": "https://picsum.photos/seed/bloxd/400/300"
   }
 ]
