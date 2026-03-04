@@ -1,5 +1,5 @@
 {
-  "name": "Unblocked Arcade",
-  "description": "A collection of unblocked games playable directly in your browser.",
-  "requestFramePermissions": []
+  "name": "GoldBar.net",
+  "description": "A premium collection of games playable directly in your browser with a gold theme.",
+  "requestFramePermissions": ["camera", "microphone", "geolocation"]
 }

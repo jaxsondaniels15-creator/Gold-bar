@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unblocked Arcade</title>
+    <title>GoldBar.net</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -20,9 +20,9 @@
     <header class="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <i data-lucide="gamepad-2" class="w-8 h-8 text-emerald-500"></i>
+                <i data-lucide="gem" class="w-8 h-8 text-amber-500"></i>
                 <h1 class="text-xl font-display font-bold tracking-tight">
-                    UNBLOCKED<span class="text-emerald-500">ARCADE</span>
+                    GOLD<span class="text-amber-500">BAR.net</span>
                 </h1>
             </div>
 
@@ -32,7 +32,7 @@
                     type="text"
                     placeholder="Search games..."
                     x-model="searchQuery"
-                    class="w-full bg-zinc-900 border border-zinc-800 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
+                    class="w-full bg-zinc-900 border border-zinc-800 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
                 >
             </div>
         </div>
@@ -44,7 +44,7 @@
             <template x-for="game in filteredGames" :key="game.id">
                 <div 
                     @click="openGame(game)"
-                    class="group relative bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 hover:border-emerald-500/50 transition-all cursor-pointer hover:-translate-y-1"
+                    class="group relative bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 hover:border-amber-500/50 transition-all cursor-pointer hover:-translate-y-1"
                 >
                     <div class="aspect-video overflow-hidden">
                         <img
@@ -55,10 +55,10 @@
                         >
                     </div>
                     <div class="p-4">
-                        <h3 class="font-bold text-lg mb-1 group-hover:text-emerald-400 transition-colors" x-text="game.title"></h3>
+                        <h3 class="font-bold text-lg mb-1 group-hover:text-amber-400 transition-colors" x-text="game.title"></h3>
                         <p class="text-sm text-zinc-400 line-clamp-2" x-text="game.description"></p>
                     </div>
-                    <div class="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                    <div class="absolute inset-0 bg-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                 </div>
             </template>
         </div>
@@ -73,7 +73,7 @@
     <!-- Footer -->
     <footer class="border-t border-zinc-800 py-8 mt-auto">
         <div class="max-w-7xl mx-auto px-4 text-center text-zinc-500 text-sm">
-            <p>&copy; 2024 Unblocked Arcade. All games are property of their respective owners.</p>
+            <p>&copy; 2024 GoldBar.net. All games are property of their respective owners.</p>
         </div>
     </footer>
 
@@ -132,8 +132,10 @@
                     <iframe
                         :src="selectedGame.url"
                         class="w-full h-full border-none"
-                        allow="autoplay; fullscreen; keyboard"
+                        allow="accelerometer *; ambient-light-sensor *; autoplay *; camera *; clipboard-read *; clipboard-write *; encrypted-media *; fullscreen *; geolocation *; gyroscope *; local-network-access *; magnetometer *; microphone *; midi *; payment *; picture-in-picture *; screen-wake-lock *; speaker *; sync-xhr *; usb *; vibrate *; vr *; web-share *; pointer-lock *"
                         :title="selectedGame.title"
+                        tabindex="0"
+                        sandbox="allow-downloads allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-storage-access-by-user-activation allow-pointer-lock allow-orientation-lock allow-presentation"
                     ></iframe>
                 </template>
             </div>
@@ -179,7 +181,11 @@
                 openGame(game) {
                     this.selectedGame = game;
                     document.body.style.overflow = 'hidden';
-                    this.$nextTick(() => lucide.createIcons());
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                        const iframe = document.querySelector('iframe');
+                        if (iframe) iframe.focus();
+                    });
                 },
 
                 closeGame() {
