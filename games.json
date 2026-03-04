@@ -12,5 +12,12 @@
     "description": "A Minecraft-inspired multiplayer game with various modes like survival, creative, and parkour. Build, explore, and compete with others in a blocky world.",
     "url": "https://bloxd.io/",
     "thumbnail": "https://picsum.photos/seed/bloxd/400/300"
+  },
+  {
+    "id": "cookie-clicker",
+    "title": "Cookie Clicker",
+    "description": "The ultimate idle game replica. Bake cookies, hire grandmas, and build cookie factories. Fully unblocked and playable in school!",
+    "url": "cookie-clicker.html",
+    "thumbnail": "https://picsum.photos/seed/cookie-gold/400/300"
   }
 ]

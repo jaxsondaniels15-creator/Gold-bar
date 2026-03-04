@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Clicker - GoldBar.net Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kavoon&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        :root {
+            --bg-blue: #0066cc;
+            --panel-bg: rgba(0, 0, 0, 0.5);
+            --border-color: #444;
+        }
+
+        body {
+            font-family: 'Merriweather', serif;
+            background-color: #1a1a1a;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .font-cookie { font-family: 'Kavoon', cursive; }
+
+        /* Background Pattern */
+        .bg-pattern {
+            background-image: url('https://orteil.dashnet.org/cookieclicker/img/bgBlue.jpg');
+            background-repeat: repeat;
+            opacity: 0.3;
+        }
+
+        /* Layout Columns */
+        .col-left { width: 300px; min-width: 300px; }
+        .col-mid { flex: 1; border-left: 4px solid #000; border-right: 4px solid #000; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; }
+        .col-right { width: 300px; background: #222; display: flex; flex-direction: column; }
+
+        /* Tabs */
+        .tab-btn {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            background: #333;
+            border-bottom: 2px solid #000;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .tab-btn.active {
+            background: #555;
+            border-bottom: 2px solid #ccc;
+        }
+
+        /* Milk Animation */
+        .milk-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .milk-wave {
+            position: absolute;
+            bottom: 0;
+            width: 200%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 40%;
+            animation: wave 10s infinite linear;
+        }
+        @keyframes wave {
+            from { transform: translateX(0) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        /* Cookie Shine */
+        .shine {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            animation: rotate 20s infinite linear;
+            pointer-events: none;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 5px #000;
+            z-index: 50;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-120px) scale(1.5); opacity: 0; }
+        }
+
+        /* Golden Cookie */
+        .golden-cookie {
+            position: absolute;
+            width: 96px;
+            height: 96px;
+            cursor: pointer;
+            z-index: 100;
+            animation: pulse 2s infinite;
+            filter: drop-shadow(0 0 10px gold);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: #333;
+            border: 2px solid #666;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 200;
+            width: 250px;
+            pointer-events: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Store Item */
+        .store-item {
+            height: 64px;
+            background: #444;
+            border-bottom: 2px solid #222;
+            cursor: pointer;
+            transition: background 0.1s;
+            position: relative;
+        }
+        .store-item:hover { background: #555; }
+        .store-item.disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.8); }
+        .store-item.unlocked { display: flex; }
+        .store-item:not(.unlocked) { display: none; }
+
+        /* Upgrade Icon */
+        .upgrade-icon {
+            width: 48px;
+            height: 48px;
+            background: #333;
+            border: 2px solid #666;
+            cursor: pointer;
+            margin: 2px;
+        }
+        .upgrade-icon:hover { border-color: #fff; }
+        .upgrade-icon.disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #444; border: 2px solid #111; }
+        ::-webkit-scrollbar-thumb:hover { background: #666; }
+    </style>
+</head>
+<body x-data="cookieGame()" x-init="init()">
+    
+    <!-- Background Pattern -->
+    <div class="fixed inset-0 bg-pattern pointer-events-none"></div>
+
+    <div class="flex h-full relative z-10">
+        
+        <!-- LEFT COLUMN: The Cookie -->
+        <div class="col-left flex flex-col items-center relative border-r-4 border-black bg-black/20">
+            <div 
+                class="w-full bg-black/60 py-4 text-center border-b-2 border-zinc-800 cursor-pointer hover:bg-black/40 transition-colors"
+                @click="renameBakery()"
+            >
+                <h2 class="text-xl font-bold font-cookie tracking-wider" x-text="bakeryName"></h2>
+                <p class="text-[10px] text-zinc-500 uppercase tracking-tighter">bakery</p>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-center relative w-full overflow-hidden">
+                <div class="shine"></div>
+                
+                <div class="text-center mb-8 relative z-10">
+                    <h1 class="text-4xl font-bold drop-shadow-lg" x-text="formatNumber(cookies) + ' cookies'"></h1>
+                    <p class="text-sm opacity-80" x-text="'per second: ' + formatNumber(cps, 1)"></p>
+                    <div x-show="frenzyTimer > 0" class="mt-2 bg-amber-500 text-black text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">
+                        FRENZY x7 ( <span x-text="Math.ceil(frenzyTimer)"></span>s )
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <button 
+                        @click="clickCookie($event)"
+                        class="relative z-10 focus:outline-none transform active:scale-95 transition-transform duration-75"
+                    >
+                        <img 
+                            src="https://orteil.dashnet.org/cookieclicker/img/perfectCookie.png" 
+                            alt="Big Cookie"
+                            class="w-64 h-64 sm:w-72 sm:h-72 drop-shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+                            referrerpolicy="no-referrer"
+                        >
+                    </button>
+                    <div id="particles" class="absolute inset-0 pointer-events-none"></div>
+                </div>
+
+                <!-- Milk -->
+                <div class="milk-container">
+                    <div class="milk-wave" :style="'bottom: ' + (Math.min(cookies/1000, 50) - 50) + '%'"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MIDDLE COLUMN: News & Stats -->
+        <div class="col-mid">
+            <!-- News Ticker -->
+            <div class="h-8 bg-black/80 border-b border-zinc-800 flex items-center justify-center px-4 overflow-hidden">
+                <p class="text-xs italic text-zinc-300" x-text="news"></p>
+            </div>
+
+            <!-- Tabs Header -->
+            <div class="flex">
+                <div class="tab-btn" :class="activeTab === 'stats' ? 'active' : ''" @click="activeTab = 'stats'">Stats</div>
+                <div class="tab-btn" :class="activeTab === 'info' ? 'active' : ''" @click="activeTab = 'info'">Info</div>
+                <div class="tab-btn" :class="activeTab === 'options' ? 'active' : ''" @click="activeTab = 'options'">Options</div>
+            </div>
+
+            <div class="flex-1 p-6 overflow-y-auto bg-black/20">
+                <!-- Stats Tab -->
+                <div x-show="activeTab === 'stats'" class="space-y-8">
+                    <div class="bg-black/40 p-4 rounded border border-zinc-800">
+                        <h3 class="text-xl font-bold border-b border-zinc-700 mb-4 pb-1">Statistics</h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p class="text-zinc-500">Cookies in bank:</p>
+                                <p class="font-bold" x-text="formatNumber(cookies)"></p>
+                            </div>
+                            <div>
+                                <p class="text-zinc-500">Cookies baked (all time):</p>
+                                <p class="font-bold" x-text="formatNumber(totalCookies)"></p>
+                            </div>
+                            <div>
+                                <p class="text-zinc-500">Cookies per second:</p>
+                                <p class="font-bold" x-text="formatNumber(cps, 1)"></p>
+                            </div>
+                            <div>
+                                <p class="text-zinc-500">Cookies per click:</p>
+                                <p class="font-bold" x-text="formatNumber(clickPower, 1)"></p>
+                            </div>
+                            <div>
+                                <p class="text-zinc-500">Prestige Level:</p>
+                                <p class="font-bold text-blue-400" x-text="prestige"></p>
+                            </div>
+                            <div>
+                                <p class="text-zinc-500">Heavenly Chips:</p>
+                                <p class="font-bold text-blue-300" x-text="heavenlyChips"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/40 p-4 rounded border border-zinc-800">
+                        <h3 class="text-xl font-bold border-b border-zinc-700 mb-4 pb-1">Achievements</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="ach in achievements" :key="ach.id">
+                                <div 
+                                    class="w-12 h-12 bg-zinc-800 rounded border-2 border-zinc-700 flex items-center justify-center text-xl grayscale opacity-30 transition-all group relative"
+                                    :class="ach.unlocked ? 'grayscale-0 opacity-100 border-amber-500' : ''"
+                                >
+                                    <span x-text="ach.icon"></span>
+                                    <div class="hidden group-hover:block absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 bg-zinc-900 border border-zinc-700 p-2 text-xs rounded z-50">
+                                        <p class="font-bold" x-text="ach.name"></p>
+                                        <p class="text-zinc-400" x-text="ach.desc"></p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Tab -->
+                <div x-show="activeTab === 'info'" class="space-y-4">
+                    <div class="bg-black/40 p-4 rounded border border-zinc-800">
+                        <h3 class="text-xl font-bold border-b border-zinc-700 mb-4 pb-1">About</h3>
+                        <p class="text-sm text-zinc-300 leading-relaxed">
+                            This is a faithful replica of Cookie Clicker, built for the GoldBar.net arcade. 
+                            Bake cookies, buy upgrades, and reach for the stars!
+                        </p>
+                    </div>
+                    <div class="bg-black/40 p-4 rounded border border-zinc-800">
+                        <h3 class="text-xl font-bold border-b border-zinc-700 mb-4 pb-1">Ascension</h3>
+                        <p class="text-sm text-zinc-300 mb-4">
+                            When you have baked enough cookies, you can ascend to gain prestige levels and heavenly chips. 
+                            Each prestige level increases your total CPS by 1%.
+                        </p>
+                        <button 
+                            @click="ascend()"
+                            class="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            :disabled="calculatePotentialPrestige() <= 0"
+                        >
+                            Ascend (Gain <span x-text="calculatePotentialPrestige()"></span> Prestige)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Options Tab -->
+                <div x-show="activeTab === 'options'" class="space-y-4">
+                    <div class="bg-black/40 p-4 rounded border border-zinc-800 space-y-4">
+                        <h3 class="text-xl font-bold border-b border-zinc-700 mb-2 pb-1">Game Settings</h3>
+                        <button @click="saveGame()" class="w-full py-2 bg-emerald-700 hover:bg-emerald-600 rounded text-sm font-bold">Manual Save</button>
+                        <button @click="resetGame()" class="w-full py-2 bg-red-900 hover:bg-red-800 rounded text-sm font-bold">Wipe Save</button>
+                        <button @click="renameBakery()" class="w-full py-2 bg-blue-900 hover:bg-blue-800 rounded text-sm font-bold">Rename Bakery</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Store -->
+        <div class="col-right flex flex-col border-l-4 border-black">
+            <div class="bg-black/60 py-3 text-center border-b-2 border-zinc-800">
+                <h2 class="text-xl font-bold uppercase tracking-widest">Store</h2>
+            </div>
+
+            <!-- Upgrades Section -->
+            <div class="p-2 border-b-2 border-black bg-zinc-900/50 min-h-[60px]">
+                <div class="flex flex-wrap">
+                    <template x-for="upg in availableUpgrades" :key="upg.id">
+                        <div 
+                            class="upgrade-icon flex items-center justify-center text-2xl relative group"
+                            @click="buyUpgrade(upg)"
+                            :class="cookies < upg.cost ? 'disabled' : ''"
+                        >
+                            <span x-text="upg.icon"></span>
+                            <!-- Tooltip -->
+                            <div class="hidden group-hover:block absolute right-full mr-2 top-0 w-48 bg-zinc-800 border-2 border-zinc-600 p-2 text-xs z-50 rounded shadow-xl">
+                                <p class="font-bold text-amber-400" x-text="upg.name"></p>
+                                <p class="text-zinc-300 my-1" x-text="upg.desc"></p>
+                                <p class="font-bold text-amber-500" x-text="formatNumber(upg.cost) + ' cookies'"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Buildings Section -->
+            <div class="flex-1 overflow-y-auto">
+                <template x-for="item in store" :key="item.id">
+                    <div 
+                        @click="buyItem(item)"
+                        class="store-item p-2 flex items-center gap-3 group"
+                        :class="[
+                            cookies < item.cost ? 'disabled' : '',
+                            totalCookies >= item.baseCost * 0.5 ? 'unlocked' : ''
+                        ]"
+                    >
+                        <div class="w-12 h-12 bg-zinc-800 rounded flex items-center justify-center text-3xl">
+                            <span x-text="item.icon"></span>
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-sm truncate" x-text="item.name"></h3>
+                                <span class="text-lg font-bold opacity-30 group-hover:opacity-100" x-text="item.owned"></span>
+                            </div>
+                            <div class="flex items-center gap-1 text-emerald-400 font-bold text-xs">
+                                <span x-text="formatNumber(item.cost)"></span>
+                                <span>🍪</span>
+                            </div>
+                        </div>
+
+                        <!-- Building Tooltip -->
+                        <div class="hidden group-hover:block absolute right-full mr-2 top-0 w-64 bg-zinc-800 border-2 border-zinc-600 p-3 text-xs z-50 rounded shadow-xl pointer-events-none">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-lg font-bold" x-text="item.name"></span>
+                                <span class="text-zinc-500" x-text="'owned: ' + item.owned"></span>
+                            </div>
+                            <p class="text-zinc-400 italic mb-2" x-text="item.flavor"></p>
+                            <div class="space-y-1 border-t border-zinc-700 pt-2">
+                                <p x-text="'Each ' + item.name.toLowerCase() + ' produces ' + formatNumber(item.cps, 1) + ' cookies per second'"></p>
+                                <p class="font-bold text-amber-400" x-text="item.owned + ' ' + item.name.toLowerCase() + 's producing ' + formatNumber(item.owned * item.cps, 1) + ' cookies per second'"></p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Golden Cookie -->
+        <img 
+            x-show="goldenCookie.active"
+            @click="clickGoldenCookie()"
+            src="https://orteil.dashnet.org/cookieclicker/img/goldCookie.png"
+            class="golden-cookie"
+            :style="'left: ' + goldenCookie.x + '%; top: ' + goldenCookie.y + '%'"
+            x-cloak
+            referrerpolicy="no-referrer"
+        >
+    </div>
+
+    <script>
+        function cookieGame() {
+            return {
+                cookies: 0,
+                totalCookies: 0,
+                cps: 0,
+                clickPower: 1,
+                bakeryName: "Unnamed Bakery",
+                news: "You feel like making cookies. But why?",
+                goldenCookie: { active: false, x: 50, y: 50 },
+                activeTab: 'stats',
+                prestige: 0,
+                heavenlyChips: 0,
+                frenzyTimer: 0,
+                frenzyMult: 1,
+                
+                store: [
+                    { id: 'cursor', name: 'Cursor', cost: 15, cps: 0.1, owned: 0, icon: '🖱️', baseCost: 15, flavor: "Autoclicks once every 10 seconds." },
+                    { id: 'grandma', name: 'Grandma', cost: 100, cps: 1, owned: 0, icon: '👵', baseCost: 100, flavor: "A nice grandma to bake more cookies." },
+                    { id: 'farm', name: 'Farm', cost: 1100, cps: 8, owned: 0, icon: '🚜', baseCost: 1100, flavor: "Grows cookie plants from cookie seeds." },
+                    { id: 'mine', name: 'Mine', cost: 12000, cps: 47, owned: 0, icon: '⛏️', baseCost: 12000, flavor: "Mines out cookie dough and chocolate chips." },
+                    { id: 'factory', name: 'Factory', cost: 130000, cps: 260, owned: 0, icon: '🏭', baseCost: 130000, flavor: "Produces cookies in large quantities." },
+                    { id: 'bank', name: 'Bank', cost: 1400000, cps: 1400, owned: 0, icon: '🏦', baseCost: 1400000, flavor: "Generates cookies from interest." },
+                    { id: 'temple', name: 'Temple', cost: 20000000, cps: 7800, owned: 0, icon: '🏛️', baseCost: 20000000, flavor: "Full of precious, ancient chocolate." },
+                    { id: 'wizard', name: 'Wizard Tower', cost: 330000000, cps: 44000, owned: 0, icon: '🧙', baseCost: 330000000, flavor: "Summons cookies with magic spells." },
+                    { id: 'shipment', name: 'Shipment', cost: 5100000000, cps: 260000, owned: 0, icon: '🚀', baseCost: 5100000000, flavor: "Brings in fresh cookies from the cookie planet." },
+                    { id: 'lab', name: 'Alchemy Lab', cost: 75000000000, cps: 1600000, owned: 0, icon: '⚗️', baseCost: 75000000000, flavor: "Turns gold into cookies!" },
+                    { id: 'portal', name: 'Portal', cost: 1000000000000, cps: 10000000, owned: 0, icon: '🌀', baseCost: 1000000000000, flavor: "Opens a door to the Cookieverse." },
+                    { id: 'time', name: 'Time Machine', cost: 14000000000000, cps: 65000000, owned: 0, icon: '⏳', baseCost: 14000000000000, flavor: "Brings cookies from the past, before they were even eaten." },
+                    { id: 'antimatter', name: 'Antimatter Condenser', cost: 170000000000000, cps: 430000000, owned: 0, icon: '⚛️', baseCost: 170000000000000, flavor: "Condenses the antimatter in the universe into cookies." },
+                    { id: 'prism', name: 'Prism', cost: 2100000000000000, cps: 2900000000, owned: 0, icon: '💎', baseCost: 2100000000000000, flavor: "Converts light itself into cookies." },
+                    { id: 'chancemaker', name: 'Chancemaker', cost: 26000000000000000, cps: 21000000000, owned: 0, icon: '🎲', baseCost: 26000000000000000, flavor: "Generates cookies out of thin air through sheer luck." },
+                    { id: 'fractal', name: 'Fractal Engine', cost: 310000000000000000, cps: 150000000000, owned: 0, icon: '🌀', baseCost: 310000000000000000, flavor: "Turns cookies into even more cookies." },
+                    { id: 'javascript', name: 'Javascript Console', cost: 7100000000000000000, cps: 1100000000000, owned: 0, icon: '💻', baseCost: 7100000000000000000, flavor: "Creates cookies from the very code the universe is written in." },
+                    { id: 'idleverse', name: 'Idleverse', cost: 1.2e20, cps: 8.3e12, owned: 0, icon: '🌌', baseCost: 1.2e20, flavor: "There's an infinite number of universes out there, and they all bake cookies." },
+                    { id: 'cortex', name: 'Cortex Baker', cost: 1.9e21, cps: 6.4e13, owned: 0, icon: '🧠', baseCost: 1.9e21, flavor: "These giant brains dream of nothing but cookies." },
+                    { id: 'you', name: 'You', cost: 5.4e22, cps: 5.1e14, owned: 0, icon: '👤', baseCost: 5.4e22, flavor: "You are the best at baking cookies. It's you. You're the building." }
+                ],
+
+                upgrades: [
+                    { id: 'upg1', name: 'Reinforced Index Finger', cost: 100, desc: 'The mouse and cursors are twice as efficient.', icon: '☝️', type: 'cursor', multiplier: 2, bought: false },
+                    { id: 'upg2', name: 'Carpal Tunnel Prevention', cost: 500, desc: 'The mouse and cursors are twice as efficient.', icon: '🧤', type: 'cursor', multiplier: 2, bought: false },
+                    { id: 'upg3', name: 'Forwards From Grandma', cost: 1000, desc: 'Grandmas are twice as efficient.', icon: '📧', type: 'grandma', multiplier: 2, bought: false },
+                    { id: 'upg4', name: 'Steel-plated Rolling Pins', cost: 5000, desc: 'Grandmas are twice as efficient.', icon: '🥖', type: 'grandma', multiplier: 2, bought: false },
+                    { id: 'upg5', name: 'Cheap Hoes', cost: 11000, desc: 'Farms are twice as efficient.', icon: '🌱', type: 'farm', multiplier: 2, bought: false },
+                    { id: 'upg6', name: 'Ambidextrous', cost: 10000, desc: 'The mouse and cursors are twice as efficient.', icon: '👐', type: 'cursor', multiplier: 2, bought: false },
+                    { id: 'upg7', name: 'Sugar-coated Wheels', cost: 50000, desc: 'Mine are twice as efficient.', icon: '⚙️', type: 'mine', multiplier: 2, bought: false },
+                    { id: 'upg8', name: 'Sturdy Conveyor Belts', cost: 500000, desc: 'Factories are twice as efficient.', icon: '🏗️', type: 'factory', multiplier: 2, bought: false }
+                ],
+
+                achievements: [
+                    { id: 'ach1', name: 'Wake and Bake', desc: 'Bake 1 cookie.', icon: '🍪', unlocked: false, condition: () => this.totalCookies >= 1 },
+                    { id: 'ach2', name: 'Daily Bread', desc: 'Bake 1,000 cookies.', icon: '🍞', unlocked: false, condition: () => this.totalCookies >= 1000 },
+                    { id: 'ach3', name: 'Cookie Monster', desc: 'Bake 1,000,000 cookies.', icon: '👹', unlocked: false, condition: () => this.totalCookies >= 1000000 },
+                    { id: 'ach4', name: 'Casual Clicker', desc: 'Click the cookie 100 times.', icon: '🖱️', unlocked: false, condition: () => this.manualClicks >= 100 },
+                    { id: 'ach5', name: 'Hardcore Clicker', desc: 'Click the cookie 1,000 times.', icon: '💥', unlocked: false, condition: () => this.manualClicks >= 1000 },
+                    { id: 'ach6', name: 'Grandma\'s Friend', desc: 'Own 10 grandmas.', icon: '👵', unlocked: false, condition: () => this.store.find(i => i.id === 'grandma').owned >= 10 }
+                ],
+
+                manualClicks: 0,
+                newsItems: [
+                    "Your cookies are popular in the neighborhood.",
+                    "A local grandma offers to help bake more cookies.",
+                    "Cookie-related crimes are on the rise.",
+                    "Scientists discover cookies are actually a basic element of the universe.",
+                    "New study finds that cookies make people 100% happier.",
+                    "Cookie farms are now visible from space.",
+                    "The world economy is now based on cookies.",
+                    "Grandmas are starting a union.",
+                    "Cookies have been declared a sovereign nation.",
+                    "Breaking: Giant cookie spotted in the sky.",
+                    "You feel like making cookies. But why?",
+                    "Your cookies are 'to die for', says local ghost.",
+                    "Cookie dough used as building material in new housing project.",
+                    "New cookie-flavored air freshener is a big hit.",
+                    "Local news: 'We just really like cookies, okay?'"
+                ],
+
+                init() {
+                    this.loadGame();
+                    setInterval(() => {
+                        this.cookies += this.cps / 10;
+                        this.totalCookies += this.cps / 10;
+                        
+                        if (this.frenzyTimer > 0) {
+                            this.frenzyTimer -= 0.1;
+                            if (this.frenzyTimer <= 0) {
+                                this.frenzyTimer = 0;
+                                this.frenzyMult = 1;
+                                this.calculateCPS();
+                            }
+                        }
+
+                        this.checkAchievements();
+                        if (Math.random() < 0.005) this.updateNews();
+                        if (!this.goldenCookie.active && Math.random() < 0.001) this.spawnGoldenCookie();
+                    }, 100);
+                    
+                    setInterval(() => this.saveGame(), 30000);
+                },
+
+                formatNumber(num, decimals = 0) {
+                    if (num >= 1e18) return (num / 1e18).toFixed(3) + " quintillion";
+                    if (num >= 1e15) return (num / 1e15).toFixed(3) + " quadrillion";
+                    if (num >= 1e12) return (num / 1e12).toFixed(3) + " trillion";
+                    if (num >= 1e9) return (num / 1e9).toFixed(3) + " billion";
+                    if (num >= 1e6) return (num / 1e6).toFixed(3) + " million";
+                    return Math.floor(num).toLocaleString();
+                },
+
+                renameBakery() {
+                    const name = prompt("What should your bakery be named?", this.bakeryName);
+                    if (name && name.trim()) {
+                        this.bakeryName = name.trim();
+                        this.saveGame();
+                    }
+                },
+
+                clickCookie(e) {
+                    this.cookies += this.clickPower;
+                    this.totalCookies += this.clickPower;
+                    this.manualClicks++;
+                    this.createParticle(e.clientX, e.clientY, "+" + this.formatNumber(this.clickPower, 1));
+                },
+
+                createParticle(x, y, text) {
+                    const p = document.createElement('div');
+                    p.className = 'particle';
+                    p.style.left = (x - 10) + 'px';
+                    p.style.top = (y - 20) + 'px';
+                    p.innerText = text;
+                    document.getElementById('particles').appendChild(p);
+                    setTimeout(() => p.remove(), 1000);
+                },
+
+                spawnGoldenCookie() {
+                    this.goldenCookie.x = Math.random() * 80 + 10;
+                    this.goldenCookie.y = Math.random() * 80 + 10;
+                    this.goldenCookie.active = true;
+                    setTimeout(() => { this.goldenCookie.active = false; }, 15000);
+                },
+
+                clickGoldenCookie() {
+                    this.goldenCookie.active = false;
+                    const rand = Math.random();
+                    if (rand < 0.5) {
+                        // Frenzy: 7x CPS for 77 seconds
+                        this.frenzyTimer = 77;
+                        this.frenzyMult = 7;
+                        this.calculateCPS();
+                        this.news = "Frenzy! Cookie production x7 for 77 seconds!";
+                    } else {
+                        // Lucky: 15% of bank or 15 mins of CPS
+                        const bonus = Math.max(this.cookies * 0.15, this.cps * 900, 13);
+                        this.cookies += bonus;
+                        this.news = "Lucky! You found " + this.formatNumber(bonus) + " cookies!";
+                    }
+                },
+
+                buyItem(item) {
+                    if (this.cookies >= item.cost) {
+                        this.cookies -= item.cost;
+                        item.owned++;
+                        item.cost = item.baseCost * Math.pow(1.15, item.owned);
+                        this.calculateCPS();
+                    }
+                },
+
+                get availableUpgrades() {
+                    return this.upgrades.filter(u => !u.bought && this.totalCookies >= u.cost * 0.5);
+                },
+
+                buyUpgrade(upg) {
+                    if (this.cookies >= upg.cost) {
+                        this.cookies -= upg.cost;
+                        upg.bought = true;
+                        this.calculateCPS();
+                    }
+                },
+
+                calculatePotentialPrestige() {
+                    // Simplified prestige formula: cube root of (total cookies / 1 trillion)
+                    const potential = Math.floor(Math.pow(this.totalCookies / 1e12, 1/3));
+                    return Math.max(0, potential - this.prestige);
+                },
+
+                ascend() {
+                    const gain = this.calculatePotentialPrestige();
+                    if (gain > 0 && confirm(`Are you sure you want to ascend? You will gain ${gain} prestige levels but lose all your cookies and buildings!`)) {
+                        this.prestige += gain;
+                        this.heavenlyChips += gain;
+                        this.cookies = 0;
+                        this.totalCookies = 0;
+                        this.manualClicks = 0;
+                        this.store.forEach(item => {
+                            item.owned = 0;
+                            item.cost = item.baseCost;
+                        });
+                        this.upgrades.forEach(u => u.bought = false);
+                        this.calculateCPS();
+                        this.saveGame();
+                        location.reload();
+                    }
+                },
+
+                calculateCPS() {
+                    let newCPS = 0;
+                    let cursorMult = 1;
+                    let grandmaMult = 1;
+                    let farmMult = 1;
+                    let mineMult = 1;
+                    let factoryMult = 1;
+
+                    this.upgrades.filter(u => u.bought).forEach(u => {
+                        if (u.type === 'cursor') cursorMult *= u.multiplier;
+                        if (u.type === 'grandma') grandmaMult *= u.multiplier;
+                        if (u.type === 'farm') farmMult *= u.multiplier;
+                        if (u.type === 'mine') mineMult *= u.multiplier;
+                        if (u.type === 'factory') factoryMult *= u.multiplier;
+                    });
+
+                    this.store.forEach(item => {
+                        let itemCPS = item.cps;
+                        if (item.id === 'cursor') itemCPS *= cursorMult;
+                        if (item.id === 'grandma') itemCPS *= grandmaMult;
+                        if (item.id === 'farm') itemCPS *= farmMult;
+                        if (item.id === 'mine') itemCPS *= mineMult;
+                        if (item.id === 'factory') itemCPS *= factoryMult;
+                        newCPS += (item.owned * itemCPS);
+                    });
+
+                    // Prestige multiplier: 1% per level
+                    newCPS *= (1 + (this.prestige * 0.01));
+
+                    // Frenzy multiplier
+                    newCPS *= this.frenzyMult;
+
+                    this.cps = newCPS;
+                    this.clickPower = (1 + (this.cps * 0.01 * cursorMult)) * this.frenzyMult;
+                },
+
+                checkAchievements() {
+                    this.achievements.forEach(ach => {
+                        if (!ach.unlocked && ach.condition()) {
+                            ach.unlocked = true;
+                        }
+                    });
+                },
+
+                updateNews() {
+                    this.news = this.newsItems[Math.floor(Math.random() * this.newsItems.length)];
+                },
+
+                saveGame() {
+                    const saveData = {
+                        cookies: this.cookies,
+                        totalCookies: this.totalCookies,
+                        manualClicks: this.manualClicks,
+                        bakeryName: this.bakeryName,
+                        prestige: this.prestige,
+                        heavenlyChips: this.heavenlyChips,
+                        store: this.store.map(i => ({ id: i.id, owned: i.owned })),
+                        upgrades: this.upgrades.map(u => ({ id: u.id, bought: u.bought }))
+                    };
+                    localStorage.setItem('cookie_save_v3', JSON.stringify(saveData));
+                },
+
+                loadGame() {
+                    const saved = localStorage.getItem('cookie_save_v3');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        this.cookies = data.cookies || 0;
+                        this.totalCookies = data.totalCookies || 0;
+                        this.manualClicks = data.manualClicks || 0;
+                        this.bakeryName = data.bakeryName || "Unnamed Bakery";
+                        this.prestige = data.prestige || 0;
+                        this.heavenlyChips = data.heavenlyChips || 0;
+                        
+                        if (data.store) {
+                            data.store.forEach(savedItem => {
+                                const item = this.store.find(i => i.id === savedItem.id);
+                                if (item) {
+                                    item.owned = savedItem.owned;
+                                    item.cost = item.baseCost * Math.pow(1.15, item.owned);
+                                }
+                            });
+                        }
+
+                        if (data.upgrades) {
+                            data.upgrades.forEach(savedUpg => {
+                                const upg = this.upgrades.find(u => u.id === savedUpg.id);
+                                if (upg) upg.bought = savedUpg.bought;
+                            });
+                        }
+                        this.calculateCPS();
+                    }
+                },
+
+                resetGame() {
+                    if (confirm("Are you sure you want to reset all progress? This cannot be undone!")) {
+                        localStorage.removeItem('cookie_save_v3');
+                        location.reload();
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
