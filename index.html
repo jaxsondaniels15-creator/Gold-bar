@@ -111,6 +111,13 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button
+                        @click="toggleFullscreen()"
+                        class="p-2 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                        title="Fullscreen"
+                    >
+                        <i data-lucide="maximize" class="w-5 h-5"></i>
+                    </button>
+                    <button
                         @click="window.open(selectedGame.url, '_blank')"
                         class="p-2 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors"
                         title="Open in new tab"
@@ -135,7 +142,7 @@
                         allow="accelerometer *; ambient-light-sensor *; autoplay *; camera *; clipboard-read *; clipboard-write *; encrypted-media *; fullscreen *; geolocation *; gyroscope *; local-network-access *; magnetometer *; microphone *; midi *; payment *; picture-in-picture *; screen-wake-lock *; speaker *; sync-xhr *; usb *; vibrate *; vr *; web-share *; pointer-lock *"
                         :title="selectedGame.title"
                         tabindex="0"
-                        sandbox="allow-downloads allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-storage-access-by-user-activation allow-pointer-lock allow-orientation-lock allow-presentation"
+                        sandbox="allow-downloads allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-pointer-lock allow-orientation-lock allow-presentation"
                     ></iframe>
                 </template>
             </div>
@@ -160,7 +167,7 @@
                         "id": "basket-random",
                         "title": "Basket Random",
                         "description": "A fun, chaotic 2-player basketball game with random physics. Score baskets by jumping and swinging your arms!",
-                        "url": "https://basketrandom.github.io/",
+                        "url": "basket-random.html",
                         "thumbnail": "https://picsum.photos/seed/basket-random/400/300"
                     },
                     {
@@ -173,9 +180,9 @@
                     {
                         "id": "cookie-clicker",
                         "title": "Cookie Clicker",
-                        "description": "The ultimate idle game replica. Bake cookies, hire grandmas, and build cookie factories. Fully unblocked and playable in school!",
+                        "description": "The legendary idle game that started a phenomenon. Bake as many cookies as humanly possible! Hire grandmas, build factories, and reach universal domination.",
                         "url": "cookie-clicker.html",
-                        "thumbnail": "https://picsum.photos/seed/cookie-gold/400/300"
+                        "thumbnail": "https://lh3.googleusercontent.com/sitesv/APaQ0SSDcr_qcGtyCKnyAnnIZJEYJ10K05hIZmUtsQr8dzu23fRq3MbA_9vkgwAzn8aNBy_stfifVqiYxQ4d0Kfp8Xxyo1AbO1bqAFnetGLxf0RfZMasN_A21xnULZKsC0-v0zpZLwlthPksXEg2CCPW24wCeZLXYJb7m6lY_FB0IuunziG2sxOJUJ774xyM7C_-Rx1BS6_XUoN6py-bl6fr4nkDgn8vTnk4j82O=w1280"
                     },
                     {
                         "id": "quick-draw",
@@ -197,6 +204,13 @@
                         "description": "Relive the classic GBA adventure! Capture, train, and battle Pokemon in the Kanto region in this enhanced remake.",
                         "url": "pokemon-leaf-green.html",
                         "thumbnail": "https://picsum.photos/seed/pokemon-leaf/400/300"
+                    },
+                    {
+                        "id": "snow-rider",
+                        "title": "Snow Rider 3D",
+                        "description": "Experience the pure thrill of a high-speed sled ride down a treacherous mountain! Dodge obstacles and collect gifts in this exhilarating 3D winter adventure.",
+                        "url": "snow-rider.html",
+                        "thumbnail": "https://lh3.googleusercontent.com/sitesv/APaQ0SRWWdg-c2-zZ4bYwAOQooXzzPxge6gW1T-kXywvS6U0Psu1YC02B3tq1RoVk7is-42PZnfFQJLG8aTCMaePBphhFX1ry_W0mMd1K8haCa9HGPFoKyu7suHDSxXNo11vmnyBuEdOzVFPoSPMpdT-vHWwgZbBKzX9_im-cNO8SN-CKST0PSkI-kbemez6xMk1_YIdmUFQUE_hkjBcvVwNGCCePQkvSbYEjXU65AA=w1280"
                     }
                 ],
                 searchQuery: '',
@@ -240,6 +254,19 @@
                 closeGame() {
                     this.selectedGame = null;
                     document.body.style.overflow = 'auto';
+                },
+
+                toggleFullscreen() {
+                    const iframe = document.querySelector('iframe');
+                    if (!iframe) return;
+                    
+                    if (iframe.requestFullscreen) {
+                        iframe.requestFullscreen();
+                    } else if (iframe.webkitRequestFullscreen) {
+                        iframe.webkitRequestFullscreen();
+                    } else if (iframe.msRequestFullscreen) {
+                        iframe.msRequestFullscreen();
+                    }
                 }
             }
         }

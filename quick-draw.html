@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quick-Draw Arcade</title>
+    <script src="/socket.io/socket.io.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Rye&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -389,6 +390,90 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
+        #auth-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .auth-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .auth-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        #multiplayer-menu, #lobby-screen, #matchmaking-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(15px);
+        }
+
+        .lobby-info {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--gold);
+            margin: 20px 0;
+            width: 300px;
+        }
+
+        .player-slot {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .ready-indicator {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        #opponent-display {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            color: var(--danger);
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .vs-badge {
+            background: var(--danger);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            vertical-align: middle;
+            margin: 0 10px;
+        }
+
         #shield-badge {
             position: absolute; 
             top: 65px; 
@@ -413,6 +498,7 @@
             <div id="timer-bar"></div>
         </div>
         <div id="lives-display">🤠🤠🤠</div>
+        <div id="opponent-display">OPPONENT IS READY!</div>
         <div id="shield-badge" style="display: none;">🛡️ VEST ACTIVE</div>
         <div id="combo-badge">COMBO x1</div>
         
@@ -442,6 +528,9 @@
                 <span class="stat-label">Best</span>
                 <span class="stat-value" id="high-score">0</span>
             </div>
+            <div class="stat-item" style="pointer-events: auto;">
+                <button onclick="quitGame()" style="background: var(--danger); color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-weight: bold; margin-left: 10px;">QUIT</button>
+            </div>
         </div>
 
         <div id="start-screen" onclick="event.stopPropagation()">
@@ -455,6 +544,63 @@
                     <p style="font-size: 1.2rem; margin: 10px 0;">🤠 Don't let the timer run out!</p>
                 </div>
                 <button class="btn" style="padding: 25px 80px; font-size: 2.2rem; background: var(--success); box-shadow: 0 0 30px rgba(68, 255, 68, 0.3);" onclick="startGame()">START GAME</button>
+                <button class="btn" style="margin-top: 20px; background: #073763;" onclick="openMultiplayerMenu()">MULTIPLAYER 1v1</button>
+                <button class="btn" style="margin-top: 10px; background: #4b0082;" onclick="startAIMode()">1v1 vs AI</button>
+            </div>
+        </div>
+
+        <div id="multiplayer-menu">
+            <div class="overlay-content">
+                <h2>MULTIPLAYER</h2>
+                <div class="upgrade-grid">
+                    <div class="upgrade-card">
+                        <span class="upgrade-name">Quick Match</span>
+                        <p style="font-size: 0.8rem; text-align: center;">Find a random opponent online</p>
+                        <button class="btn" onclick="startMatchmaking()">FIND MATCH</button>
+                    </div>
+                    <div class="upgrade-card">
+                        <span class="upgrade-name">Private Lobby</span>
+                        <p style="font-size: 0.8rem; text-align: center;">Play with a friend using a code</p>
+                        <button class="btn" onclick="createLobby()">CREATE LOBBY</button>
+                        <div style="margin-top: 10px; width: 100%;">
+                            <input type="text" id="lobby-code-input" placeholder="ENTER CODE" style="width: 100%; padding: 10px; border-radius: 5px; border: none; text-align: center; font-family: inherit;">
+                            <button class="btn" style="width: 100%; font-size: 1rem; padding: 8px;" onclick="joinLobby()">JOIN LOBBY</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn" style="background: #333;" onclick="closeMultiplayerMenu()">BACK</button>
+            </div>
+        </div>
+
+        <div id="lobby-screen">
+            <div class="overlay-content">
+                <h2 style="font-size: 3rem;">LOBBY</h2>
+                <div style="font-size: 1.5rem; color: var(--gold); margin: 10px 0;">CODE: <span id="lobby-code-display" style="font-weight: bold; letter-spacing: 3px;">------</span></div>
+                
+                <div class="lobby-info">
+                    <div class="player-slot">
+                        <span id="p1-name">Player 1</span>
+                        <span id="p1-ready" class="ready-indicator"></span>
+                    </div>
+                    <div class="player-slot">
+                        <span id="p2-name">Waiting...</span>
+                        <span id="p2-ready" class="ready-indicator"></span>
+                    </div>
+                </div>
+
+                <button class="btn" id="ready-btn" onclick="toggleReady()" style="background: var(--success); padding: 15px 60px;">READY</button>
+                <button class="btn" style="background: #333;" onclick="leaveLobby()">LEAVE</button>
+            </div>
+        </div>
+
+        <div id="matchmaking-screen">
+            <div class="overlay-content">
+                <h2 style="font-size: 3rem;">MATCHMAKING</h2>
+                <div style="margin: 40px 0;">
+                    <div class="target bandit" style="position: static; margin: 0 auto; animation: boss-pulse 1s infinite alternate;"></div>
+                </div>
+                <p style="font-size: 1.2rem;">Searching for an outlaw...</p>
+                <button class="btn" style="background: #333;" onclick="cancelMatchmaking()">CANCEL</button>
             </div>
         </div>
         
@@ -595,6 +741,12 @@
             startScreen.style.display = 'none';
             spawnTarget();
             startTimer();
+        }
+
+        function quitGame() {
+            if (confirm("Are you sure you want to quit?")) {
+                location.reload();
+            }
         }
 
         function restartLevel() {
@@ -913,7 +1065,226 @@
             }
         };
 
-        // window.onload = startGame; // Removed to allow start button to trigger it
+        // --- Multiplayer & AI Logic ---
+        let socket = null;
+        let currentLobby = null;
+        let isMultiplayer = false;
+        let isAIMode = false;
+        let aiDifficulty = 0.5; // 0.5s reaction time base
+
+        function openMultiplayerMenu() {
+            document.getElementById('multiplayer-menu').style.display = 'flex';
+            if (!socket) {
+                socket = io();
+                setupSocketHandlers();
+            }
+        }
+
+        function closeMultiplayerMenu() {
+            document.getElementById('multiplayer-menu').style.display = 'none';
+        }
+
+        function setupSocketHandlers() {
+            socket.on('lobby-created', (lobby) => {
+                currentLobby = lobby;
+                showLobby(lobby);
+            });
+
+            socket.on('player-joined', (lobby) => {
+                currentLobby = lobby;
+                showLobby(lobby);
+            });
+
+            socket.on('player-ready-update', (players) => {
+                currentLobby.players = players;
+                updateLobbyUI();
+            });
+
+            socket.on('game-starting', () => {
+                document.getElementById('lobby-screen').style.display = 'none';
+                showOpponentStatus("GET READY...");
+            });
+
+            socket.on('new-round', (data) => {
+                isMultiplayer = true;
+                isGameOver = false;
+                isShopOpen = false;
+                startScreen.style.display = 'none';
+                
+                // Hide existing targets
+                if (currentTarget) currentTarget.remove();
+                
+                showOpponentStatus(`ROUND ${data.round}`);
+                
+                setTimeout(() => {
+                    spawnMultiplayerTarget(data);
+                }, data.delay);
+            });
+
+            socket.on('round-winner', (data) => {
+                showOpponentStatus(`${data.winnerName} WON! (${data.reactionTime}ms)`);
+                currentLobby.players = data.players;
+                updateMultiplayerScores();
+            });
+
+            socket.on('player-left', (lobby) => {
+                currentLobby = lobby;
+                if (isMultiplayer) {
+                    endGame("Opponent disconnected");
+                } else {
+                    updateLobbyUI();
+                }
+            });
+
+            socket.on('error', (msg) => alert(msg));
+        }
+
+        function createLobby() {
+            const name = prompt("Enter your name:", "Outlaw") || "Outlaw";
+            socket.emit('create-lobby', name);
+        }
+
+        function joinLobby() {
+            const code = document.getElementById('lobby-code-input').value.toUpperCase();
+            if (!code) return alert("Enter a code");
+            const name = prompt("Enter your name:", "Outlaw") || "Outlaw";
+            socket.emit('join-lobby', { lobbyId: code, playerName: name });
+        }
+
+        function startMatchmaking() {
+            const name = prompt("Enter your name:", "Outlaw") || "Outlaw";
+            document.getElementById('matchmaking-screen').style.display = 'flex';
+            socket.emit('matchmaking', name);
+        }
+
+        function showLobby(lobby) {
+            document.getElementById('multiplayer-menu').style.display = 'none';
+            document.getElementById('lobby-screen').style.display = 'flex';
+            document.getElementById('lobby-code-display').innerText = lobby.id;
+            updateLobbyUI();
+        }
+
+        function updateLobbyUI() {
+            const p1 = currentLobby.players[0];
+            const p2 = currentLobby.players[1];
+            
+            document.getElementById('p1-name').innerText = p1 ? p1.name : "Waiting...";
+            document.getElementById('p1-ready').innerText = (p1 && p1.ready) ? "READY" : "";
+            
+            document.getElementById('p2-name').innerText = p2 ? p2.name : "Waiting...";
+            document.getElementById('p2-ready').innerText = (p2 && p2.ready) ? "READY" : "";
+            
+            const myPlayer = currentLobby.players.find(p => p.id === socket.id);
+            document.getElementById('ready-btn').innerText = (myPlayer && myPlayer.ready) ? "UNREADY" : "READY";
+        }
+
+        function toggleReady() {
+            socket.emit('player-ready', currentLobby.id);
+        }
+
+        function leaveLobby() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+            location.reload();
+        }
+
+        function cancelMatchmaking() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+            document.getElementById('matchmaking-screen').style.display = 'none';
+            document.getElementById('multiplayer-menu').style.display = 'flex';
+        }
+
+        function showOpponentStatus(text) {
+            const el = document.getElementById('opponent-display');
+            el.innerText = text;
+            el.style.display = 'block';
+            setTimeout(() => {
+                if (el.innerText === text) el.style.display = 'none';
+            }, 2000);
+        }
+
+        function spawnMultiplayerTarget(data) {
+            if (currentTarget) currentTarget.remove();
+            
+            const target = document.createElement('div');
+            const isGold = data.targetType === 'golden';
+            target.className = isGold ? 'target golden' : 'target bandit';
+            target.innerHTML = isGold ? 'GOLDEN' : 'SHOOT!';
+            
+            target.style.width = targetSize + 'px';
+            target.style.height = targetSize + 'px';
+            target.style.left = data.targetPos.x + '%';
+            target.style.top = data.targetPos.y + '%';
+            
+            const spawnTime = Date.now();
+            
+            target.onclick = (e) => {
+                e.stopPropagation();
+                const reactionTime = Date.now() - spawnTime;
+                socket.emit('report-hit', { lobbyId: currentLobby.id, reactionTime });
+                target.remove();
+            };
+            
+            viewport.appendChild(target);
+            currentTarget = target;
+        }
+
+        function updateMultiplayerScores() {
+            const p1 = currentLobby.players[0];
+            const p2 = currentLobby.players[1];
+            // Update UI to show scores
+            scoreEl.innerText = `P1: ${p1?.score || 0} | P2: ${p2?.score || 0}`;
+        }
+
+        // AI Mode
+        function startAIMode() {
+            isAIMode = true;
+            isMultiplayer = false;
+            startGame();
+            showOpponentStatus("VS COMPUTER");
+        }
+
+        // Override hitBandit to handle AI
+        const originalHitBandit = hitBandit;
+        hitBandit = function(x, y) {
+            if (isAIMode) {
+                clearTimeout(aiTimeout);
+                originalHitBandit(x, y);
+                // AI will "hit" after a delay in the next round
+            } else {
+                originalHitBandit(x, y);
+            }
+        };
+
+        // Override spawnTarget to handle AI
+        const originalSpawnTarget = spawnTarget;
+        spawnTarget = function() {
+            originalSpawnTarget();
+            if (isAIMode && !isGameOver && !isShopOpen) {
+                const aiDelay = Math.random() * 400 + (600 - (level * 20)); // AI gets faster
+                aiTimeout = setTimeout(() => {
+                    if (currentTarget && !isGameOver && !isShopOpen) {
+                        handleMiss("AI was faster!");
+                    }
+                }, Math.max(300, aiDelay));
+            }
+        };
+
+        // Save progress on game over or level up
+        const originalEndGame = endGame;
+        endGame = function(reason) {
+            originalEndGame(reason);
+        };
+
+        const originalOpenShop = openShop;
+        openShop = function() {
+            originalOpenShop();
+        };
     </script>
 </body>
 </html>
