@@ -856,6 +856,26 @@
                 ],
 
                 async init() {
+                    // Boot Sequence Safety
+                    setTimeout(() => {
+                        if (this.loading) {
+                            this.loading = false;
+                            console.warn("Loading screen timed out");
+                        }
+                    }, 8000);
+
+                    const interval = setInterval(() => {
+                        this.loadingProgress += Math.random() * 15;
+                        if (this.loadingProgress >= 100) {
+                            this.loadingProgress = 100;
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                this.loading = false;
+                                this.$nextTick(() => lucide.createIcons());
+                            }, 500);
+                        }
+                    }, 200);
+
                     try {
                         // Wait for Firebase to be ready
                         const waitForFirebase = () => {
@@ -879,26 +899,6 @@
 
                         this.auth = window.GoldBarAuth.auth;
                         this.db = window.GoldBarFirestore.db;
-
-                    // Boot Sequence Safety
-                    setTimeout(() => {
-                        if (this.loading) {
-                            this.loading = false;
-                            console.warn("Loading screen timed out");
-                        }
-                    }, 5000);
-
-                    const interval = setInterval(() => {
-                        this.loadingProgress += Math.random() * 15;
-                        if (this.loadingProgress >= 100) {
-                            this.loadingProgress = 100;
-                            clearInterval(interval);
-                            setTimeout(() => {
-                                this.loading = false;
-                                this.$nextTick(() => lucide.createIcons());
-                            }, 500);
-                        }
-                    }, 200);
 
                     // Auth Listener
                     window.GoldBarAuth.onAuthStateChanged(this.auth, async (user) => {
@@ -928,6 +928,7 @@
                     this.$nextTick(() => lucide.createIcons());
                     } catch (e) {
                         console.error("Initialization Error:", e);
+                        this.loading = false;
                         this.showToast("System Error: " + e.message, "alert-triangle");
                     }
                 },
