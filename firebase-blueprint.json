@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user identity, stats, and preferences.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "name": { "type": "string", "description": "Display name" },
+        "avatar": { "type": "string", "description": "Avatar URL" },
+        "role": { "type": "string", "enum": ["admin", "user"], "description": "Access level" },
+        "level": { "type": "integer", "description": "User experience level" },
+        "achievements": { "type": "array", "items": { "type": "string" } },
+        "favorites": { "type": "array", "items": { "type": "string" } },
+        "recentlyPlayed": { "type": "array", "items": { "type": "string" } },
+        "gameControls": { "type": "object", "description": "Custom keybindings per game" }
+      },
+      "required": ["uid", "name", "role"]
+    },
+    "ChatMessage": {
+      "title": "Chat Message",
+      "description": "A message sent in the global or request chat.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "text": { "type": "string" },
+        "type": { "type": "string", "enum": ["chat", "request"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "text", "timestamp"]
+    },
+    "GameRating": {
+      "title": "Game Rating & Review",
+      "description": "User feedback for a specific game.",
+      "type": "object",
+      "properties": {
+        "gameId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "rating": { "type": "integer" },
+        "review": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "replies": { "type": "array", "items": { "$ref": "ReviewReply" } }
+      },
+      "required": ["gameId", "userId", "rating"]
+    },
+    "ReviewReply": {
+      "title": "Review Reply",
+      "description": "A reply to a game review.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents."
+    },
+    "/messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "Global chat and game requests."
+    },
+    "/ratings/{ratingId}": {
+      "schema": "GameRating",
+      "description": "Game reviews and ratings."
+    }
+  }
+}

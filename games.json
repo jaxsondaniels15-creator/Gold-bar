@@ -4,48 +4,63 @@
     "title": "Basket Random",
     "description": "A fun, chaotic 2-player basketball game with random physics. Score baskets by jumping and swinging your arms!",
     "url": "basket-random.html",
-    "thumbnail": "https://picsum.photos/seed/basket-random/400/300"
+    "thumbnail": "https://picsum.photos/seed/basket-random/400/300",
+    "source": "github.io"
   },
   {
     "id": "bloxd-io",
     "title": "Bloxd.io",
     "description": "A Minecraft-inspired multiplayer game with various modes like survival, creative, and parkour. Build, explore, and compete with others in a blocky world.",
     "url": "https://bloxd.io/",
-    "thumbnail": "https://picsum.photos/seed/bloxd/400/300"
+    "thumbnail": "https://picsum.photos/seed/bloxd/400/300",
+    "source": "bloxd.io"
   },
   {
     "id": "cookie-clicker",
     "title": "Cookie Clicker",
     "description": "The legendary idle game that started a phenomenon. Bake as many cookies as humanly possible! Hire grandmas, build factories, and reach universal domination.",
     "url": "cookie-clicker.html",
-    "thumbnail": "https://lh3.googleusercontent.com/sitesv/APaQ0SSDcr_qcGtyCKnyAnnIZJEYJ10K05hIZmUtsQr8dzu23fRq3MbA_9vkgwAzn8aNBy_stfifVqiYxQ4d0Kfp8Xxyo1AbO1bqAFnetGLxf0RfZMasN_A21xnULZKsC0-v0zpZLwlthPksXEg2CCPW24wCeZLXYJb7m6lY_FB0IuunziG2sxOJUJ774xyM7C_-Rx1BS6_XUoN6py-bl6fr4nkDgn8vTnk4j82O=w1280"
+    "thumbnail": "https://lh3.googleusercontent.com/sitesv/APaQ0SSDcr_qcGtyCKnyAnnIZJEYJ10K05hIZmUtsQr8dzu23fRq3MbA_9vkgwAzn8aNBy_stfifVqiYxQ4d0Kfp8Xxyo1AbO1bqAFnetGLxf0RfZMasN_A21xnULZKsC0-v0zpZLwlthPksXEg2CCPW24wCeZLXYJb7m6lY_FB0IuunziG2sxOJUJ774xyM7C_-Rx1BS6_XUoN6py-bl6fr4nkDgn8vTnk4j82O=w1280",
+    "source": "script.google.com"
   },
   {
     "id": "quick-draw",
     "title": "Quick-Draw",
     "description": "The ultimate wild west reaction test. Progress through levels, buy upgrades, and survive the bandit onslaught in this upgraded arcade classic!",
     "url": "quick-draw.html",
-    "thumbnail": "https://picsum.photos/seed/quickdraw/400/300"
+    "thumbnail": "https://picsum.photos/seed/quickdraw/400/300",
+    "source": "goldbar.net"
   },
   {
     "id": "retro-bowl",
     "title": "Retro Bowl",
     "description": "The classic 8-bit style American football game. Manage your team, call the plays, and lead your franchise to glory.",
     "url": "https://freegamesunblocked76.github.io/retro-bowl/",
-    "thumbnail": "https://picsum.photos/seed/retro-bowl/400/300"
+    "thumbnail": "https://picsum.photos/seed/retro-bowl/400/300",
+    "source": "github.io"
   },
   {
     "id": "pokemon-leaf-green",
     "title": "Pokemon Leaf Green",
     "description": "Relive the classic GBA adventure! Capture, train, and battle Pokemon in the Kanto region in this enhanced remake.",
     "url": "pokemon-leaf-green.html",
-    "thumbnail": "https://picsum.photos/seed/pokemon-leaf/400/300"
+    "thumbnail": "https://picsum.photos/seed/pokemon-leaf/400/300",
+    "source": "script.google.com"
   },
   {
     "id": "snow-rider",
     "title": "Snow Rider 3D",
     "description": "Experience the pure thrill of a high-speed sled ride down a treacherous mountain! Dodge obstacles and collect gifts in this exhilarating 3D winter adventure.",
     "url": "snow-rider.html",
-    "thumbnail": "https://lh3.googleusercontent.com/sitesv/APaQ0SRWWdg-c2-zZ4bYwAOQooXzzPxge6gW1T-kXywvS6U0Psu1YC02B3tq1RoVk7is-42PZnfFQJLG8aTCMaePBphhFX1ry_W0mMd1K8haCa9HGPFoKyu7suHDSxXNo11vmnyBuEdOzVFPoSPMpdT-vHWwgZbBKzX9_im-cNO8SN-CKST0PSkI-kbemez6xMk1_YIdmUFQUE_hkjBcvVwNGCCePQkvSbYEjXU65AA=w1280"
+    "thumbnail": "https://lh3.googleusercontent.com/sitesv/APaQ0SRWWdg-c2-zZ4bYwAOQooXzzPxge6gW1T-kXywvS6U0Psu1YC02B3tq1RoVk7is-42PZnfFQJLG8aTCMaePBphhFX1ry_W0mMd1K8haCa9HGPFoKyu7suHDSxXNo11vmnyBuEdOzVFPoSPMpdT-vHWwgZbBKzX9_im-cNO8SN-CKST0PSkI-kbemez6xMk1_YIdmUFQUE_hkjBcvVwNGCCePQkvSbYEjXU65AA=w1280",
+    "source": "script.google.com"
+  },
+  {
+    "id": "football-bros",
+    "title": "Football Bros",
+    "description": "A fast-paced, action-packed American football game. Dash, pass, and score touchdowns in this exciting sports arcade experience!",
+    "url": "football-bros.html",
+    "thumbnail": "https://picsum.photos/seed/football/400/300",
+    "source": "footballbros.io"
   }
 ]

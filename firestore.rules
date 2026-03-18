@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId} (Auth UID)
+    // Fields:
+    //   - uid: string (required)
+    //   - name: string (required)
+    //   - avatar: string (optional)
+    //   - role: string (required, 'admin' or 'user')
+    //   - level: number (optional)
+    //   - achievements: list (optional)
+    //   - favorites: list (optional)
+    //   - recentlyPlayed: list (optional)
+    //   - gameControls: map (optional)
+    //
+    // Collection: messages
+    // Document ID: {messageId} (Auto-generated)
+    // Fields:
+    //   - userId: string (required)
+    //   - userName: string (required)
+    //   - text: string (required, max 500 chars)
+    //   - type: string (required, 'chat' or 'request')
+    //   - timestamp: timestamp (required)
+    //
+    // Collection: ratings
+    // Document ID: {ratingId} (Auto-generated)
+    // Fields:
+    //   - gameId: string (required)
+    //   - userId: string (required)
+    //   - userName: string (required)
+    //   - rating: number (required, 1-5)
+    //   - review: string (optional, max 1000 chars)
+    //   - timestamp: timestamp (required)
+    //   - replies: list (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "jaxsondaniels15@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'name', 'role']) &&
+             data.uid == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 50 &&
+             data.role in ['admin', 'user'];
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['userId', 'userName', 'text', 'type', 'timestamp']) &&
+             data.userId == request.auth.uid &&
+             data.userName is string && data.userName.size() > 0 &&
+             data.text is string && data.text.size() > 0 && data.text.size() <= 500 &&
+             data.type in ['chat', 'request'] &&
+             data.timestamp == request.time;
+    }
+
+    function isValidRating(data) {
+      return data.keys().hasAll(['gameId', 'userId', 'userName', 'rating', 'timestamp']) &&
+             data.userId == request.auth.uid &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+             (!('review' in data) || (data.review is string && data.review.size() <= 1000)) &&
+             data.timestamp == request.time;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == 'user' || isAdmin());
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == resource.data.role || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidMessage(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+
+    match /ratings/{ratingId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidRating(request.resource.data);
+      allow update: if (isOwner(resource.data.userId) && isValidRating(request.resource.data)) || isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}
