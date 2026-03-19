@@ -876,6 +876,15 @@
                         }
                     }, 200);
 
+                    // Load Games Immediately
+                    try {
+                        const response = await fetch('games.json');
+                        if (response.ok) {
+                            this.games = await response.json();
+                            this.$nextTick(() => lucide.createIcons());
+                        }
+                    } catch (e) { console.error("Games Load Error:", e); }
+
                     try {
                         // Wait for Firebase to be ready
                         const waitForFirebase = () => {
@@ -900,32 +909,24 @@
                         this.auth = window.GoldBarAuth.auth;
                         this.db = window.GoldBarFirestore.db;
 
-                    // Auth Listener
-                    window.GoldBarAuth.onAuthStateChanged(this.auth, async (user) => {
-                        if (user) {
-                            this.user = user;
-                            this.isGuest = false;
-                            this.isAdmin = user.email === 'jaxsondaniels15@gmail.com';
-                            await this.syncProfile(user);
-                            this.setupListeners();
-                        } else {
-                            this.user = null;
-                            this.isAdmin = false;
-                            if (!this.isGuest) {
-                                this.modals.auth = true;
+                        // Auth Listener
+                        window.GoldBarAuth.onAuthStateChanged(this.auth, async (user) => {
+                            if (user) {
+                                this.user = user;
+                                this.isGuest = false;
+                                this.isAdmin = user.email === 'jaxsondaniels15@gmail.com';
+                                await this.syncProfile(user);
+                                this.setupListeners();
+                            } else {
+                                this.user = null;
+                                this.isAdmin = false;
+                                if (!this.isGuest) {
+                                    this.modals.auth = true;
+                                }
                             }
-                        }
-                    });
+                        });
 
-                    // Load Games
-                    try {
-                        const response = await fetch('games.json');
-                        if (response.ok) {
-                            this.games = await response.json();
-                        }
-                    } catch (e) { console.error(e); }
-
-                    this.$nextTick(() => lucide.createIcons());
+                        this.$nextTick(() => lucide.createIcons());
                     } catch (e) {
                         console.error("Initialization Error:", e);
                         this.loading = false;
