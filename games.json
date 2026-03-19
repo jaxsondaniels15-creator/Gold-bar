@@ -62,5 +62,13 @@
     "url": "football-bros.html",
     "thumbnail": "https://picsum.photos/seed/football/400/300",
     "source": "footballbros.io"
+  },
+  {
+    "id": "gunspin",
+    "title": "GunSpin",
+    "description": "What if your only way forward was to shoot backward? That’s the core challenge in the addictive physics launcher, GunSpin. Use a weapon's powerful recoil to propel it through the air, manage your ammo, and buy powerful upgrades!",
+    "url": "gunspin.html",
+    "thumbnail": "https://lh3.googleusercontent.com/sitesv/APaQ0SQ88WNSSf-GtLK0y5_nE6ViV30hQ0BuTrM6jAPAX1IKhI-6m5vuLfcrJEzwt6a7l6gEd1FPM4BmLF_tsiZj6DxpuH3wFYDevWsXFJ_qpB9IDn8OSSLXVr3Pl_uEh7Bif4SL6OU8N6iedtmWlX3NswGNi-Ecj-MH72KYlNXqz-6udurKuUmj294g3_GLY6cUsWprsP8E_FhrTS-b996nCjRXPYgiUze5IdRK9zM=w1280",
+    "source": "classroom6x"
   }
 ]
