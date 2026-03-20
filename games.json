@@ -2,7 +2,8 @@
   {
     "id": "basket-random",
     "title": "Basket Random",
-    "description": "A fun, chaotic 2-player basketball game with random physics. Score baskets by jumping and swinging your arms!",
+    "category": "Sports",
+    "description": "A fun, chaotic 2-player basketball game with random physics. Score baskets by jumping and swinging your arms in ever-changing environments!",
     "url": "basket-random.html",
     "thumbnail": "https://picsum.photos/seed/basket-random/400/300",
     "source": "github.io"
@@ -10,6 +11,7 @@
   {
     "id": "bloxd-io",
     "title": "Bloxd.io",
+    "category": "IO",
     "description": "A Minecraft-inspired multiplayer game with various modes like survival, creative, and parkour. Build, explore, and compete with others in a blocky world.",
     "url": "https://bloxd.io/",
     "thumbnail": "https://picsum.photos/seed/bloxd/400/300",
@@ -18,14 +20,16 @@
   {
     "id": "cookie-clicker",
     "title": "Cookie Clicker",
-    "description": "The legendary idle game that started a phenomenon. Bake as many cookies as humanly possible! Hire grandmas, build factories, and reach universal domination.",
+    "category": "Idle",
+    "description": "The legendary idle game! Bake as many cookies as humanly possible. Hire grandmas, build factories, and reach universal domination through the power of cookies.",
     "url": "cookie-clicker.html",
-    "thumbnail": "https://lh3.googleusercontent.com/sitesv/APaQ0SSDcr_qcGtyCKnyAnnIZJEYJ10K05hIZmUtsQr8dzu23fRq3MbA_9vkgwAzn8aNBy_stfifVqiYxQ4d0Kfp8Xxyo1AbO1bqAFnetGLxf0RfZMasN_A21xnULZKsC0-v0zpZLwlthPksXEg2CCPW24wCeZLXYJb7m6lY_FB0IuunziG2sxOJUJ774xyM7C_-Rx1BS6_XUoN6py-bl6fr4nkDgn8vTnk4j82O=w1280",
+    "thumbnail": "https://picsum.photos/seed/cookie/400/300",
     "source": "script.google.com"
   },
   {
     "id": "quick-draw",
     "title": "Quick-Draw",
+    "category": "Action",
     "description": "The ultimate wild west reaction test. Progress through levels, buy upgrades, and survive the bandit onslaught in this upgraded arcade classic!",
     "url": "quick-draw.html",
     "thumbnail": "https://picsum.photos/seed/quickdraw/400/300",
@@ -34,7 +38,8 @@
   {
     "id": "retro-bowl",
     "title": "Retro Bowl",
-    "description": "The classic 8-bit style American football game. Manage your team, call the plays, and lead your franchise to glory.",
+    "category": "Sports",
+    "description": "The classic 8-bit style American football game. Manage your team, call the plays, and lead your franchise to glory in this addictive sports sim.",
     "url": "https://freegamesunblocked76.github.io/retro-bowl/",
     "thumbnail": "https://picsum.photos/seed/retro-bowl/400/300",
     "source": "github.io"
@@ -42,7 +47,8 @@
   {
     "id": "pokemon-leaf-green",
     "title": "Pokemon Leaf Green",
-    "description": "Relive the classic GBA adventure! Capture, train, and battle Pokemon in the Kanto region in this enhanced remake.",
+    "category": "Adventure",
+    "description": "Relive the classic GBA adventure! Capture, train, and battle Pokemon in the Kanto region in this enhanced remake of the original masterpiece.",
     "url": "pokemon-leaf-green.html",
     "thumbnail": "https://picsum.photos/seed/pokemon-leaf/400/300",
     "source": "script.google.com"
@@ -50,14 +56,16 @@
   {
     "id": "snow-rider",
     "title": "Snow Rider 3D",
+    "category": "Racing",
     "description": "Experience the pure thrill of a high-speed sled ride down a treacherous mountain! Dodge obstacles and collect gifts in this exhilarating 3D winter adventure.",
     "url": "snow-rider.html",
-    "thumbnail": "https://lh3.googleusercontent.com/sitesv/APaQ0SRWWdg-c2-zZ4bYwAOQooXzzPxge6gW1T-kXywvS6U0Psu1YC02B3tq1RoVk7is-42PZnfFQJLG8aTCMaePBphhFX1ry_W0mMd1K8haCa9HGPFoKyu7suHDSxXNo11vmnyBuEdOzVFPoSPMpdT-vHWwgZbBKzX9_im-cNO8SN-CKST0PSkI-kbemez6xMk1_YIdmUFQUE_hkjBcvVwNGCCePQkvSbYEjXU65AA=w1280",
+    "thumbnail": "https://picsum.photos/seed/snowrider/400/300",
     "source": "script.google.com"
   },
   {
     "id": "football-bros",
     "title": "Football Bros",
+    "category": "Sports",
     "description": "A fast-paced, action-packed American football game. Dash, pass, and score touchdowns in this exciting sports arcade experience!",
     "url": "football-bros.html",
     "thumbnail": "https://picsum.photos/seed/football/400/300",
@@ -66,14 +74,16 @@
   {
     "id": "gunspin",
     "title": "GunSpin",
-    "description": "What if your only way forward was to shoot backward? That’s the core challenge in the addictive physics launcher, GunSpin. Use a weapon's powerful recoil to propel it through the air, manage your ammo, and buy powerful upgrades!",
+    "category": "Action",
+    "description": "Use a weapon's powerful recoil to propel it through the air! Manage your ammo, buy powerful upgrades, and see how far you can shoot your gun.",
     "url": "gunspin.html",
-    "thumbnail": "https://lh3.googleusercontent.com/sitesv/APaQ0SQ88WNSSf-GtLK0y5_nE6ViV30hQ0BuTrM6jAPAX1IKhI-6m5vuLfcrJEzwt6a7l6gEd1FPM4BmLF_tsiZj6DxpuH3wFYDevWsXFJ_qpB9IDn8OSSLXVr3Pl_uEh7Bif4SL6OU8N6iedtmWlX3NswGNi-Ecj-MH72KYlNXqz-6udurKuUmj294g3_GLY6cUsWprsP8E_FhrTS-b996nCjRXPYgiUze5IdRK9zM=w1280",
+    "thumbnail": "https://picsum.photos/seed/gunspin/400/300",
     "source": "classroom6x"
   },
   {
     "id": "slope",
     "title": "Slope",
+    "category": "Racing",
     "description": "A fast-paced 3D physics game where you control a ball rolling down a neon slope. Avoid obstacles and stay on the track as it gets faster and more challenging!",
     "url": "https://kdata1.com/2020/05/slope/",
     "thumbnail": "https://picsum.photos/seed/slope/400/300",
@@ -82,6 +92,7 @@
   {
     "id": "minecraft-classic",
     "title": "Minecraft Classic",
+    "category": "Adventure",
     "description": "The original web version of Minecraft. Build anything you can imagine with 32 different blocks in this creative sandbox experience.",
     "url": "https://classic.minecraft.net/",
     "thumbnail": "https://picsum.photos/seed/minecraft/400/300",
@@ -90,6 +101,7 @@
   {
     "id": "shell-shockers",
     "title": "Shell Shockers",
+    "category": "Action",
     "description": "The world's most popular egg-based multiplayer shooter! Choose your class and blast your way through various maps in this high-octane FPS.",
     "url": "https://shellshock.io/",
     "thumbnail": "https://picsum.photos/seed/shellshock/400/300",
@@ -98,6 +110,7 @@
   {
     "id": "pixel-gun-survival",
     "title": "Pixel Gun Survival",
+    "category": "Action",
     "description": "A blocky survival shooter where you fight against waves of zombies and other players in a pixelated world.",
     "url": "https://gibbat2.github.io/Games/games/pixelgun/",
     "thumbnail": "https://picsum.photos/seed/pixelgun/400/300",
@@ -106,6 +119,7 @@
   {
     "id": "getaway-shootout",
     "title": "Getaway Shootout",
+    "category": "Action",
     "description": "A chaotic two-player physics game where you race to the getaway vehicle. Jump, shoot, and use power-ups to outsmart your opponent!",
     "url": "https://gibbat2.github.io/Games/games/getaway-shootout/",
     "thumbnail": "https://picsum.photos/seed/getaway/400/300",

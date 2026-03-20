@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GOLDBAR | DASHBOARD</title>
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/@tailwindcss/browser@4" crossorigin="anonymous"></script>
     <script type="module" src="/src/main.ts"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/lucide@latest" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         @import "tailwindcss";
@@ -495,7 +495,7 @@
                 </div>
 
                 <!-- Dashboard Widgets -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
                     <!-- User Stats -->
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-2.5 flex flex-col gap-3">
                         <div class="flex items-center justify-between">
@@ -560,18 +560,18 @@
                     >
                         All_Units
                     </button>
-                    <template x-for="source in uniqueSources" :key="source">
+                    <template x-for="category in uniqueCategories" :key="category">
                         <button 
-                            @click="activeTab = source"
-                            :class="activeTab === source ? 'bg-amber-500 text-black font-bold' : 'bg-white/5 text-white/40 hover:text-white border border-white/5'"
+                            @click="activeTab = category"
+                            :class="activeTab === category ? 'bg-amber-500 text-black font-bold' : 'bg-white/5 text-white/40 hover:text-white border border-white/5'"
                             class="px-4 py-1 rounded-full text-[8px] font-mono uppercase tracking-widest transition-all"
-                            x-text="source"
+                            x-text="category"
                         ></button>
                     </template>
                 </div>
 
                 <!-- Game Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                     <template x-for="game in filteredGames" :key="game.id">
                         <div 
                             class="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/10"
@@ -625,6 +625,41 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Launch Modal -->
+    <div x-show="modals.launch.show" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" @click="modals.launch.show = false"></div>
+        <div class="relative w-full max-w-sm bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl text-center">
+            <div class="mb-6">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden border-2 border-amber-500/50 shadow-lg shadow-amber-500/20">
+                    <img :src="modals.launch.game?.thumbnail" class="w-full h-full object-cover">
+                </div>
+                <h2 class="text-xl font-black italic mb-1" x-text="modals.launch.game?.title"></h2>
+                <p class="text-[10px] font-mono text-white/40 uppercase tracking-widest" x-text="modals.launch.game?.category"></p>
+            </div>
+
+            <div class="space-y-3">
+                <button 
+                    @click="playInBrowser()" 
+                    class="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-3 group"
+                >
+                    <i data-lucide="layout" class="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform"></i>
+                    <span>STAY IN BROWSER</span>
+                </button>
+                <button 
+                    @click="playFullscreen()" 
+                    class="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-4 rounded-2xl transition-all flex items-center justify-center gap-3 group"
+                >
+                    <i data-lucide="external-link" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                    <span>FULLSCREEN (NEW TAB)</span>
+                </button>
+            </div>
+
+            <button @click="modals.launch.show = false" class="mt-6 text-[10px] font-mono text-white/20 hover:text-white uppercase tracking-widest transition-colors">
+                [ ABORT_LAUNCH ]
+            </button>
+        </div>
     </div>
 
     <!-- Game Modal -->
@@ -706,6 +741,7 @@
                                 Exit Theater
                             </button>
                             <iframe 
+                                x-ref="gameIframe"
                                 :src="selectedGame.url" 
                                 class="w-full h-full border-none"
                                 allow="accelerometer *; ambient-light-sensor *; autoplay *; camera *; clipboard-read *; clipboard-write *; encrypted-media *; fullscreen *; geolocation *; gyroscope *; local-network-access *; magnetometer *; microphone *; midi *; payment *; picture-in-picture *; screen-wake-lock *; speaker *; sync-xhr *; usb *; vibrate *; vr *; web-share *; pointer-lock *"
@@ -719,7 +755,7 @@
                                 <button @click="settings.theaterMode = !settings.theaterMode" class="p-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-white/60 hover:text-amber-400 transition-all" title="Theater Mode">
                                     <i data-lucide="monitor" class="w-4 h-4"></i>
                                 </button>
-                                <button @click="$el.closest('div').querySelector('iframe').requestFullscreen()" class="p-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-white/60 hover:text-amber-400 transition-all" title="Fullscreen">
+                                <button @click="$refs.gameIframe.requestFullscreen()" class="p-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-white/60 hover:text-amber-400 transition-all" title="Fullscreen">
                                     <i data-lucide="maximize" class="w-4 h-4"></i>
                                 </button>
                                 <button @click="const url = selectedGame.url; selectedGame.url = ''; $nextTick(() => selectedGame.url = url)" class="p-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-white/60 hover:text-amber-400 transition-all" title="Reload Game">
@@ -776,9 +812,9 @@
     <!-- Admin Modal -->
     <div x-show="modals.admin" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center p-4" x-data="{ adminTab: 'dashboard' }">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="modals.admin = false"></div>
-        <div class="relative w-full max-w-3xl bg-zinc-900 border border-amber-500/30 rounded-3xl p-0 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div class="relative w-full max-w-3xl bg-zinc-900 border border-amber-500/30 rounded-3xl p-0 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <!-- Header -->
-            <div class="p-8 pb-4 flex items-center justify-between border-b border-white/5">
+            <div class="p-6 pb-3 flex items-center justify-between border-b border-white/5">
                 <h2 class="text-2xl font-black italic">ADMIN<span class="text-amber-400">_CONTROL</span></h2>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full">
@@ -792,11 +828,11 @@
             </div>
 
             <!-- Tabs -->
-            <div class="flex px-8 border-b border-white/5">
+            <div class="flex px-6 border-b border-white/5">
                 <template x-for="tab in ['dashboard', 'games', 'users', 'logs']">
                     <button 
                         @click="adminTab = tab"
-                        class="px-6 py-4 text-[10px] font-mono uppercase tracking-widest transition-all border-b-2"
+                        class="px-4 py-3 text-[10px] font-mono uppercase tracking-widest transition-all border-b-2"
                         :class="adminTab === tab ? 'text-amber-400 border-amber-400' : 'text-white/40 border-transparent hover:text-white'"
                         x-text="tab"
                     ></button>
@@ -900,7 +936,7 @@
                     <div class="p-8 bg-white/5 border border-white/10 rounded-2xl text-center">
                         <i data-lucide="users" class="w-12 h-12 text-white/10 mx-auto mb-4"></i>
                         <p class="text-xs text-white/40 italic">User database connection pending...</p>
-                        <button @click="alert('Simulating user fetch...')" class="mt-4 text-[10px] font-mono text-amber-400 uppercase hover:underline">Retry_Sync</button>
+                        <button @click="showToast('Simulating user fetch...', 'users')" class="mt-4 text-[10px] font-mono text-amber-400 uppercase hover:underline">Retry_Sync</button>
                     </div>
                 </div>
 
@@ -1274,10 +1310,13 @@
                         <label class="text-[9px] font-mono text-white/40 uppercase tracking-widest">Category</label>
                         <select x-model="admin.gameEditor.game.category" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500/50 transition-all text-white">
                             <option value="Action" class="bg-zinc-900">Action</option>
+                            <option value="Racing" class="bg-zinc-900">Racing</option>
+                            <option value="Platformer" class="bg-zinc-900">Platformer</option>
+                            <option value="Puzzle" class="bg-zinc-900">Puzzle</option>
                             <option value="Sports" class="bg-zinc-900">Sports</option>
-                            <option value="Casual" class="bg-zinc-900">Casual</option>
-                            <option value="Retro" class="bg-zinc-900">Retro</option>
-                            <option value="Strategy" class="bg-zinc-900">Strategy</option>
+                            <option value="IO" class="bg-zinc-900">IO</option>
+                            <option value="Idle" class="bg-zinc-900">Idle</option>
+                            <option value="Adventure" class="bg-zinc-900">Adventure</option>
                         </select>
                     </div>
                 </div>
@@ -1360,7 +1399,17 @@
                     systemMessage: 'All systems operational. Welcome to the Arcade.',
                     gameEditor: {
                         show: false,
-                        game: null
+                        game: {
+                            id: '',
+                            title: '',
+                            category: 'Action',
+                            thumbnail: '',
+                            url: '',
+                            description: '',
+                            rating: 0,
+                            plays: 0,
+                            source: 'External'
+                        }
                     }
                 },
 
@@ -1399,7 +1448,8 @@
                     settings: false,
                     reviews: false,
                     auth: false,
-                    admin: false
+                    admin: false,
+                    launch: { show: false, game: null }
                 },
 
                 calcInput: '',
@@ -1436,6 +1486,12 @@
                     { id: 'chat_active', name: 'Social Unit', icon: 'message-circle' }
                 ],
 
+                safeCreateIcons() {
+                    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                        lucide.createIcons();
+                    }
+                },
+
                 addLog(message, type = 'info') {
                     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     this.admin.logs.unshift({ id: Date.now(), type, message, time });
@@ -1469,21 +1525,23 @@
                 saveGame() {
                     const game = this.admin.gameEditor.game;
                     if (!game.title || !game.url) {
-                        alert('Title and URL are required');
+                        this.showToast('Title and URL are required', 'alert-triangle');
                         return;
                     }
                     
                     const index = this.games.findIndex(g => g.id === game.id);
                     if (index !== -1) {
                         this.games[index] = { ...game };
+                        this.games = [...this.games]; // Trigger reactivity
                         this.addLog(`Game "${game.title}" updated`, 'info');
                     } else {
                         this.games.push({ ...game });
+                        this.games = [...this.games]; // Trigger reactivity
                         this.addLog(`New game "${game.title}" added`, 'success');
                     }
                     
                     this.admin.gameEditor.show = false;
-                    this.admin.gameEditor.game = null;
+                    this.admin.gameEditor.game = { id: '', title: '', category: 'Action', thumbnail: '', url: '', description: '' };
                 },
 
                 randomGame() {
@@ -1572,7 +1630,7 @@
                             clearInterval(interval);
                             setTimeout(() => {
                                 this.loading = false;
-                                this.$nextTick(() => lucide.createIcons());
+                                this.$nextTick(() => this.safeCreateIcons());
                             }, 500);
                         }
                     }, 200);
@@ -1582,7 +1640,7 @@
                         const response = await fetch('games.json');
                         if (response.ok) {
                             this.games = await response.json();
-                            this.$nextTick(() => lucide.createIcons());
+                            this.$nextTick(() => this.safeCreateIcons());
                         }
                     } catch (e) { console.error("Games Load Error:", e); }
 
@@ -1630,7 +1688,7 @@
                             }
                         });
 
-                        this.$nextTick(() => lucide.createIcons());
+                        this.$nextTick(() => this.safeCreateIcons());
                     } catch (e) {
                         console.error("Initialization Error:", e);
                         this.loading = false;
@@ -1786,15 +1844,15 @@
                     });
                 },
 
-                get uniqueSources() {
-                    const sources = this.games.map(g => g.source).filter(Boolean);
-                    return [...new Set(sources)].sort();
+                get uniqueCategories() {
+                    const categories = this.games.map(g => g.category).filter(Boolean);
+                    return [...new Set(categories)].sort();
                 },
 
                 get filteredGames() {
                     let filtered = this.games;
                     if (this.activeTab !== 'all') {
-                        filtered = filtered.filter(game => game.source === this.activeTab);
+                        filtered = filtered.filter(game => game.category === this.activeTab);
                     }
                     if (this.searchQuery) {
                         const query = this.searchQuery.toLowerCase();
@@ -1944,7 +2002,26 @@
 
                 async openGame(game) {
                     this.playSound('click');
-                    // Anti-Blocking: About:Blank Cloaking
+                    this.modals.launch.game = game;
+                    this.modals.launch.show = true;
+                },
+
+                playInBrowser() {
+                    const game = this.modals.launch.game;
+                    this.modals.launch.show = false;
+                    this.selectedGame = game;
+                    this.unlockAchievement('first_game');
+                    this.updateRecentlyPlayed(game);
+                    document.body.style.overflow = 'hidden';
+                    this.$nextTick(() => this.safeCreateIcons());
+                },
+
+                playFullscreen() {
+                    const game = this.modals.launch.game;
+                    this.modals.launch.show = false;
+                    this.updateRecentlyPlayed(game);
+                    
+                    // Open in new tab with cloaking if enabled
                     if (this.settings.blankCloak) {
                         const win = window.open('about:blank', '_blank');
                         if (win) {
@@ -1957,7 +2034,6 @@
                             iframe.src = game.url;
                             win.document.body.appendChild(iframe);
                             
-                            // Set title and favicon in the new tab if cloaking is on
                             if (this.settings.cloakMode) {
                                 win.document.title = this.settings.cloakPreset === 'classroom' ? 'Classes' : 
                                            this.settings.cloakPreset === 'canvas' ? 'Dashboard' : 
@@ -1972,12 +2048,13 @@
                             } else {
                                 win.document.title = game.title;
                             }
-                            return;
                         }
+                    } else {
+                        window.open(game.url, '_blank');
                     }
+                },
 
-                    this.selectedGame = game;
-                    this.unlockAchievement('first_game');
+                async updateRecentlyPlayed(game) {
                     if (this.user) {
                         const path = `users/${this.user.uid}`;
                         try {
@@ -1991,8 +2068,6 @@
                             this.handleFirestoreError(e, 'update', path);
                         }
                     }
-                    document.body.style.overflow = 'hidden';
-                    this.$nextTick(() => lucide.createIcons());
                 },
 
                 closeGame() {
@@ -2009,15 +2084,25 @@
                         hover: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
                         success: 'https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3'
                     };
-                    const audio = new Audio(sounds[type]);
-                    audio.volume = (this.settings.volume / 100) * 0.2;
-                    audio.play().catch(() => {});
+                    try {
+                        const audio = new Audio(sounds[type]);
+                        audio.crossOrigin = "anonymous";
+                        audio.volume = (this.settings.volume / 100) * 0.2;
+                        const playPromise = audio.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(() => {
+                                // Ignore autoplay errors or loading failures
+                            });
+                        }
+                    } catch (e) {
+                        // Silently fail to avoid script errors
+                    }
                 },
 
                 openReviews(game) {
                     this.reviewGame = game;
                     this.modals.reviews = true;
-                    this.$nextTick(() => lucide.createIcons());
+                    this.$nextTick(() => this.safeCreateIcons());
                 },
 
                 async submitRating() {
@@ -2104,7 +2189,7 @@
                 },
 
                 toggleFullscreen() {
-                    const iframe = document.querySelector('iframe');
+                    const iframe = this.$refs.gameIframe;
                     if (iframe) {
                         if (iframe.requestFullscreen) iframe.requestFullscreen();
                         else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
