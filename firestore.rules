@@ -14,10 +14,13 @@ service cloud.firestore {
     //   - avatar: string (optional)
     //   - role: string (required, 'admin' or 'user')
     //   - level: number (optional)
+    //   - exp: number (optional)
     //   - achievements: list (optional)
     //   - favorites: list (optional)
     //   - recentlyPlayed: list (optional)
+    //   - notes: string (optional, max 10000 chars)
     //   - gameControls: map (optional)
+    //   - settings: map (optional)
     //
     // Collection: messages
     // Document ID: {messageId} (Auto-generated)
@@ -67,7 +70,15 @@ service cloud.firestore {
       return data.keys().hasAll(['uid', 'name', 'role']) &&
              data.uid == request.auth.uid &&
              data.name is string && data.name.size() > 0 && data.name.size() < 50 &&
-             data.role in ['admin', 'user'];
+             data.role in ['admin', 'user'] &&
+             (!('level' in data) || data.level is number) &&
+             (!('exp' in data) || data.exp is number) &&
+             (!('achievements' in data) || data.achievements is list) &&
+             (!('favorites' in data) || data.favorites is list) &&
+             (!('recentlyPlayed' in data) || data.recentlyPlayed is list) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 10000)) &&
+             (!('gameControls' in data) || data.gameControls is map) &&
+             (!('settings' in data) || data.settings is map);
     }
 
     function isValidMessage(data) {

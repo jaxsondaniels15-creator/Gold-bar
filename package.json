@@ -12,7 +12,7 @@
     "lint": "echo 'No linting for JS'"
   },
   "dependencies": {
-    "@google/genai": "^1.29.0",
+    "@google/genai": "^1.46.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
     "axios": "^1.13.6",

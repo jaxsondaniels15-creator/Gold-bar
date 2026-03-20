@@ -292,6 +292,10 @@
             <div class="flex border-b border-white/10">
                 <button @click="chatTab = 'global'" :class="chatTab === 'global' ? 'border-amber-500 text-amber-400' : 'border-transparent text-white/40'" class="flex-1 py-2 text-[9px] font-mono uppercase tracking-widest border-b-2 transition-all">Global Chat</button>
                 <button @click="chatTab = 'requests'" :class="chatTab === 'requests' ? 'border-amber-500 text-amber-400' : 'border-transparent text-white/40'" class="flex-1 py-2 text-[9px] font-mono uppercase tracking-widest border-b-2 transition-all">Requests</button>
+                <button @click="chatTab = 'ai'" :class="chatTab === 'ai' ? 'border-amber-500 text-amber-400' : 'border-transparent text-white/40'" class="flex-1 py-2 text-[9px] font-mono uppercase tracking-widest border-b-2 transition-all flex items-center justify-center gap-1.5">
+                    AI Assistant
+                    <span class="w-1 h-1 bg-amber-500 rounded-full animate-pulse"></span>
+                </button>
             </div>
 
             <!-- Chat Content -->
@@ -320,17 +324,34 @@
                         </div>
                     </template>
                 </template>
+                <template x-if="chatTab === 'ai'">
+                    <div class="space-y-3">
+                        <template x-for="msg in aiMessages" :key="msg.id">
+                            <div class="space-y-1" :class="msg.role === 'user' ? 'text-right' : ''">
+                                <div class="flex items-center gap-2" :class="msg.role === 'user' ? 'justify-end' : ''">
+                                    <span class="text-[10px] font-bold" :class="msg.role === 'user' ? 'text-white/40' : 'text-amber-400'" x-text="msg.role === 'user' ? 'YOU' : 'GOLDBAR_AI'"></span>
+                                </div>
+                                <p class="text-xs leading-relaxed" :class="msg.role === 'user' ? 'text-white/60' : 'text-white/80'" x-text="msg.text"></p>
+                            </div>
+                        </template>
+                        <div x-show="aiLoading" class="flex items-center gap-2">
+                            <div class="w-1 h-1 bg-amber-400 rounded-full animate-bounce"></div>
+                            <div class="w-1 h-1 bg-amber-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                            <div class="w-1 h-1 bg-amber-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             <!-- Chat Input -->
             <div class="p-4 border-t border-white/10 bg-black/20">
-                <template x-if="!isGuest">
+                <template x-if="!isGuest || chatTab === 'ai'">
                     <form @submit.prevent="sendMessage()" class="relative">
                         <input 
                             x-ref="chatInput"
                             type="text" 
                             x-model="newMessage" 
-                            :placeholder="chatTab === 'global' ? 'Type a message...' : 'Request a game...'"
+                            :placeholder="chatTab === 'ai' ? 'Ask AI anything...' : (chatTab === 'global' ? 'Type a message...' : 'Request a game...')"
                             class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-4 pr-10 text-xs focus:outline-none focus:border-amber-500/50 transition-all"
                         >
                         <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:text-amber-400 transition-colors">
@@ -1384,6 +1405,10 @@
                 messages: [],
                 gameRequests: [],
                 gameRatings: {},
+                aiMessages: [
+                    { id: 1, role: 'assistant', text: 'HELLO_UNIT. I AM GOLDBAR_AI. HOW CAN I ASSIST YOU TODAY?' }
+                ],
+                aiLoading: false,
                 
                 admin: {
                     stats: {
@@ -1417,8 +1442,8 @@
                     userId: localStorage.getItem('arcade_uid') || 'user_' + Math.random().toString(36).substr(2, 9),
                     name: localStorage.getItem('arcade_name') || 'Guest_Unit',
                     avatar: localStorage.getItem('arcade_avatar') || 'https://picsum.photos/seed/arcade1/200/200',
-                    level: 1,
-                    exp: 45, // Initial experience for visual bar
+                    level: parseInt(localStorage.getItem('arcade_level')) || 1,
+                    exp: parseInt(localStorage.getItem('arcade_exp')) || 0,
                     memberSince: new Date().toLocaleDateString([], { month: 'short', year: 'numeric' }),
                     lastLogin: new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
                     achievements: [],
@@ -1574,30 +1599,54 @@
                     // Anti-Blocking: Tab Cloaking
                     this.$watch('profile.notes', (val) => {
                         localStorage.setItem('arcade_notes', val);
+                        this.syncToFirestore({ notes: val });
                     });
                     this.$watch('settings.cloakMode', (val) => {
                         localStorage.setItem('arcade_cloak', val);
                         this.applyCloak();
+                        this.syncToFirestore({ 'settings.cloakMode': val });
                     });
                     this.$watch('settings.cloakPreset', (val) => {
                         localStorage.setItem('arcade_cloak_preset', val);
                         this.applyCloak();
+                        this.syncToFirestore({ 'settings.cloakPreset': val });
                     });
                     this.$watch('settings.autoCloakOnBlur', (val) => {
                         localStorage.setItem('arcade_auto_cloak_blur', val);
+                        this.syncToFirestore({ 'settings.autoCloakOnBlur': val });
                     });
                     this.$watch('settings.blankCloak', (val) => {
                         localStorage.setItem('arcade_blank_cloak', val);
+                        this.syncToFirestore({ 'settings.blankCloak': val });
                     });
                     this.$watch('settings.accentColor', (val) => {
                         localStorage.setItem('arcade_accent_color', val);
                         document.documentElement.style.setProperty('--accent-color', val);
+                        this.syncToFirestore({ 'settings.accentColor': val });
                     });
                     this.$watch('settings.bgEffect', (val) => {
                         localStorage.setItem('arcade_bg_effect', val);
+                        this.syncToFirestore({ 'settings.bgEffect': val });
                     });
                     this.$watch('settings.soundEffects', (val) => {
                         localStorage.setItem('arcade_sounds', val);
+                        this.syncToFirestore({ 'settings.soundEffects': val });
+                    });
+                    this.$watch('settings.brightness', (val) => {
+                        localStorage.setItem('arcade_brightness', val);
+                        this.syncToFirestore({ 'settings.brightness': val });
+                    });
+                    this.$watch('settings.volume', (val) => {
+                        localStorage.setItem('arcade_volume', val);
+                        this.syncToFirestore({ 'settings.volume': val });
+                    });
+                    this.$watch('settings.panicKey', (val) => {
+                        localStorage.setItem('arcade_panic_key', val);
+                        this.syncToFirestore({ 'settings.panicKey': val });
+                    });
+                    this.$watch('settings.panicUrl', (val) => {
+                        localStorage.setItem('arcade_panic_url', val);
+                        this.syncToFirestore({ 'settings.panicUrl': val });
                     });
                     this.applyCloak();
                     document.documentElement.style.setProperty('--accent-color', this.settings.accentColor);
@@ -1670,24 +1719,32 @@
 
                         // Auth Listener
                         window.GoldBarAuth.onAuthStateChanged(this.auth, async (user) => {
-                            if (user) {
-                                this.user = user;
-                                this.isGuest = false;
-                                this.isAdmin = user.email === 'jaxsondaniels15@gmail.com';
-                                await this.syncProfile(user);
-                                this.setupListeners();
-                            } else {
-                                this.user = null;
-                                this.isAdmin = false;
-                                // Even if not logged in, guests should see chat if rules allow
-                                if (this.isGuest) {
+                            try {
+                                if (user) {
+                                    console.log("Auth State Changed: User Logged In", user.uid);
+                                    this.user = user;
+                                    this.isGuest = false;
+                                    this.isAdmin = user.email === 'jaxsondaniels15@gmail.com';
+                                    await this.syncProfile(user);
                                     this.setupListeners();
                                 } else {
-                                    this.modals.auth = true;
+                                    console.log("Auth State Changed: No User");
+                                    this.user = null;
+                                    this.isAdmin = false;
+                                    // Even if not logged in, guests should see chat if rules allow
+                                    if (this.isGuest) {
+                                        this.setupListeners();
+                                    } else {
+                                        this.modals.auth = true;
+                                    }
                                 }
+                            } catch (e) {
+                                console.error("Auth Listener Error:", e);
+                                this.showToast("Auth Error: " + e.message, "alert-triangle");
                             }
                         });
 
+                        console.log("System Ready");
                         this.$nextTick(() => this.safeCreateIcons());
                     } catch (e) {
                         console.error("Initialization Error:", e);
@@ -1749,10 +1806,15 @@
                 },
 
                 async login() {
+                    console.log("Login button clicked");
                     if (this.loginLoading) return;
                     this.loginLoading = true;
                     try {
-                        await window.GoldBarAuth.signInWithPopup(this.auth, window.GoldBarAuth.googleProvider);
+                        const authInstance = window.GoldBarAuth.auth;
+                        const provider = window.GoldBarAuth.googleProvider;
+                        console.log("Attempting signInWithPopup...");
+                        await window.GoldBarAuth.signInWithPopup(authInstance, provider);
+                        console.log("Login successful");
                         this.isGuest = false;
                         this.modals.auth = false;
                     } catch (e) {
@@ -1762,7 +1824,7 @@
                         } else if (e.code === 'auth/cancelled-popup-request') {
                             // Ignore cancellation
                         } else {
-                            this.showToast("Login Failed: " + e.message, "alert-triangle");
+                            this.showToast("Login Failed: " + (e.message || "Unknown Error"), "alert-triangle");
                         }
                     } finally {
                         this.loginLoading = false;
@@ -1784,29 +1846,57 @@
                 async syncProfile(user) {
                     const path = `users/${user.uid}`;
                     try {
+                        console.log("Syncing profile for:", user.uid);
                         const userRef = window.GoldBarFirestore.doc(this.db, 'users', user.uid);
                         const userSnap = await window.GoldBarFirestore.getDoc(userRef);
 
                         if (userSnap.exists()) {
-                            this.profile = { ...this.profile, ...userSnap.data() };
+                            const data = userSnap.data();
+                            console.log("Profile found in Firestore");
+                            this.profile = { ...this.profile, ...data };
+                            if (data.settings) {
+                                this.settings = { ...this.settings, ...data.settings };
+                            }
+                            localStorage.setItem('arcade_level', this.profile.level);
+                            localStorage.setItem('arcade_exp', this.profile.exp);
+                            localStorage.setItem('arcade_name', this.profile.name);
+                            localStorage.setItem('arcade_avatar', this.profile.avatar);
+                            localStorage.setItem('arcade_notes', this.profile.notes || '');
+                            localStorage.setItem('arcade_uid', this.profile.uid);
                         } else {
+                            console.log("Creating new profile in Firestore");
                             const newProfile = {
                                 uid: user.uid,
                                 name: user.displayName || 'New_Unit',
                                 avatar: user.photoURL || this.avatars[0],
                                 role: this.isAdmin ? 'admin' : 'user',
                                 level: 1,
+                                exp: 0,
                                 achievements: ['first_login'],
                                 recentlyPlayed: [],
                                 favorites: [],
-                                gameControls: {}
+                                notes: '',
+                                gameControls: {},
+                                settings: { ...this.settings }
                             };
                             await window.GoldBarFirestore.setDoc(userRef, newProfile);
                             this.profile = newProfile;
                             this.showToast('System Boot', 'power');
                         }
                     } catch (e) {
-                        this.handleFirestoreError(e, 'write', path);
+                        console.error("Sync Profile Error:", e);
+                        this.handleFirestoreError(e, 'get', path);
+                    }
+                },
+
+                async syncToFirestore(data) {
+                    if (!this.user) return;
+                    const path = `users/${this.user.uid}`;
+                    try {
+                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
+                        await window.GoldBarFirestore.updateDoc(userRef, data);
+                    } catch (e) {
+                        this.handleFirestoreError(e, 'update', path);
                     }
                 },
 
@@ -1900,35 +1990,23 @@
 
                 async toggleFavorite(id) {
                     if (!this.user) return;
-                    const path = `users/${this.user.uid}`;
-                    try {
-                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
-                        let favorites = [...(this.profile.favorites || [])];
-                        if (favorites.includes(id)) {
-                            favorites = favorites.filter(fid => fid !== id);
-                        } else {
-                            favorites.push(id);
-                        }
-                        await window.GoldBarFirestore.updateDoc(userRef, { favorites });
-                        this.profile.favorites = favorites;
-                    } catch (e) {
-                        this.handleFirestoreError(e, 'update', path);
+                    let favorites = [...(this.profile.favorites || [])];
+                    if (favorites.includes(id)) {
+                        favorites = favorites.filter(fid => fid !== id);
+                    } else {
+                        favorites.push(id);
                     }
+                    this.profile.favorites = favorites;
+                    this.syncToFirestore({ favorites });
                 },
 
                 async updateGameControl(gameId, key, value) {
                     if (!this.user) return;
-                    const path = `users/${this.user.uid}`;
-                    try {
-                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
-                        const controls = { ...(this.profile.gameControls || {}) };
-                        if (!controls[gameId]) controls[gameId] = { 'Move': 'WASD', 'Action': 'SPACE' };
-                        controls[gameId][key] = value;
-                        await window.GoldBarFirestore.updateDoc(userRef, { gameControls: controls });
-                        this.profile.gameControls = controls;
-                    } catch (e) {
-                        this.handleFirestoreError(e, 'update', path);
-                    }
+                    const controls = { ...(this.profile.gameControls || {}) };
+                    if (!controls[gameId]) controls[gameId] = { 'Move': 'WASD', 'Action': 'SPACE' };
+                    controls[gameId][key] = value;
+                    this.profile.gameControls = controls;
+                    this.syncToFirestore({ gameControls: controls });
                 },
 
                 addControlMapping(gameId) {
@@ -1939,7 +2017,18 @@
                 },
 
                 async sendMessage() {
-                    if (!this.newMessage.trim() || !this.user) return;
+                    if (!this.newMessage.trim()) return;
+                    
+                    if (this.chatTab === 'ai') {
+                        await this.sendAiMessage();
+                        return;
+                    }
+
+                    if (!this.user) {
+                        this.showToast("Sign in to chat!", "user");
+                        return;
+                    }
+
                     const path = 'messages';
                     try {
                         await window.GoldBarFirestore.addDoc(window.GoldBarFirestore.collection(this.db, path), {
@@ -1953,6 +2042,43 @@
                         this.unlockAchievement('chat_active');
                     } catch (e) {
                         this.handleFirestoreError(e, 'create', path);
+                    }
+                },
+
+                async sendAiMessage() {
+                    const userMsg = this.newMessage.trim();
+                    this.newMessage = '';
+                    
+                    this.aiMessages.push({
+                        id: Date.now(),
+                        role: 'user',
+                        text: userMsg
+                    });
+                    
+                    this.aiLoading = true;
+                    this.$nextTick(() => {
+                        this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight;
+                    });
+                    
+                    try {
+                        const response = await window.GoldBarAI.generateResponse(userMsg);
+                        this.aiMessages.push({
+                            id: Date.now() + 1,
+                            role: 'assistant',
+                            text: response
+                        });
+                    } catch (e) {
+                        console.error("AI Error:", e);
+                        this.aiMessages.push({
+                            id: Date.now() + 1,
+                            role: 'assistant',
+                            text: "ERROR_COMMUNICATING_WITH_CORE. PLEASE_TRY_AGAIN_LATER."
+                        });
+                    } finally {
+                        this.aiLoading = false;
+                        this.$nextTick(() => {
+                            this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight;
+                        });
                     }
                 },
 
@@ -1978,16 +2104,13 @@
 
                 async unlockAchievement(id) {
                     if (!this.user || this.hasAchievement(id)) return;
-                    const path = `users/${this.user.uid}`;
-                    try {
-                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
-                        const newAchievements = [...this.profile.achievements, id];
-                        await window.GoldBarFirestore.updateDoc(userRef, { achievements: newAchievements });
-                        this.profile.achievements = newAchievements;
-                        const ach = this.allAchievements.find(a => a.id === id);
-                        if (ach) this.showToast(ach.name, ach.icon);
-                    } catch (e) {
-                        this.handleFirestoreError(e, 'update', path);
+                    const newAchievements = [...this.profile.achievements, id];
+                    this.profile.achievements = newAchievements;
+                    this.syncToFirestore({ achievements: newAchievements });
+                    const ach = this.allAchievements.find(a => a.id === id);
+                    if (ach) {
+                        this.showToast(ach.name, ach.icon);
+                        this.gainExp(20);
                     }
                 },
 
@@ -2054,6 +2177,22 @@
                     }
                 },
 
+                gainExp(amount) {
+                    if (!this.user) return;
+                    this.profile.exp = (this.profile.exp || 0) + amount;
+                    localStorage.setItem('arcade_exp', this.profile.exp);
+                    if (this.profile.exp >= 100) {
+                        this.profile.exp -= 100;
+                        this.profile.level = (this.profile.level || 1) + 1;
+                        localStorage.setItem('arcade_level', this.profile.level);
+                        localStorage.setItem('arcade_exp', this.profile.exp);
+                        this.showToast(`LEVEL UP: ${this.profile.level}`, 'zap');
+                        this.syncToFirestore({ level: this.profile.level, exp: this.profile.exp });
+                    } else {
+                        this.syncToFirestore({ exp: this.profile.exp });
+                    }
+                },
+
                 async updateRecentlyPlayed(game) {
                     if (this.user) {
                         const path = `users/${this.user.uid}`;
@@ -2064,6 +2203,7 @@
                             const newList = [game.id, ...filtered].slice(0, 10);
                             await window.GoldBarFirestore.updateDoc(userRef, { recentlyPlayed: newList });
                             this.profile.recentlyPlayed = newList;
+                            this.gainExp(5);
                         } catch (e) {
                             this.handleFirestoreError(e, 'update', path);
                         }

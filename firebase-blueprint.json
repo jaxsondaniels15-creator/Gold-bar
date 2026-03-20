@@ -10,10 +10,13 @@
         "avatar": { "type": "string", "description": "Avatar URL" },
         "role": { "type": "string", "enum": ["admin", "user"], "description": "Access level" },
         "level": { "type": "integer", "description": "User experience level" },
+        "exp": { "type": "integer", "description": "Experience points" },
         "achievements": { "type": "array", "items": { "type": "string" } },
         "favorites": { "type": "array", "items": { "type": "string" } },
         "recentlyPlayed": { "type": "array", "items": { "type": "string" } },
-        "gameControls": { "type": "object", "description": "Custom keybindings per game" }
+        "notes": { "type": "string", "description": "User personal notes" },
+        "gameControls": { "type": "object", "description": "Custom keybindings per game" },
+        "settings": { "type": "object", "description": "User preferences and settings" }
       },
       "required": ["uid", "name", "role"]
     },
