@@ -70,5 +70,45 @@
     "url": "gunspin.html",
     "thumbnail": "https://lh3.googleusercontent.com/sitesv/APaQ0SQ88WNSSf-GtLK0y5_nE6ViV30hQ0BuTrM6jAPAX1IKhI-6m5vuLfcrJEzwt6a7l6gEd1FPM4BmLF_tsiZj6DxpuH3wFYDevWsXFJ_qpB9IDn8OSSLXVr3Pl_uEh7Bif4SL6OU8N6iedtmWlX3NswGNi-Ecj-MH72KYlNXqz-6udurKuUmj294g3_GLY6cUsWprsP8E_FhrTS-b996nCjRXPYgiUze5IdRK9zM=w1280",
     "source": "classroom6x"
+  },
+  {
+    "id": "slope",
+    "title": "Slope",
+    "description": "A fast-paced 3D physics game where you control a ball rolling down a neon slope. Avoid obstacles and stay on the track as it gets faster and more challenging!",
+    "url": "https://kdata1.com/2020/05/slope/",
+    "thumbnail": "https://picsum.photos/seed/slope/400/300",
+    "source": "kdata1.com"
+  },
+  {
+    "id": "minecraft-classic",
+    "title": "Minecraft Classic",
+    "description": "The original web version of Minecraft. Build anything you can imagine with 32 different blocks in this creative sandbox experience.",
+    "url": "https://classic.minecraft.net/",
+    "thumbnail": "https://picsum.photos/seed/minecraft/400/300",
+    "source": "minecraft.net"
+  },
+  {
+    "id": "shell-shockers",
+    "title": "Shell Shockers",
+    "description": "The world's most popular egg-based multiplayer shooter! Choose your class and blast your way through various maps in this high-octane FPS.",
+    "url": "https://shellshock.io/",
+    "thumbnail": "https://picsum.photos/seed/shellshock/400/300",
+    "source": "shellshock.io"
+  },
+  {
+    "id": "pixel-gun-survival",
+    "title": "Pixel Gun Survival",
+    "description": "A blocky survival shooter where you fight against waves of zombies and other players in a pixelated world.",
+    "url": "https://gibbat2.github.io/Games/games/pixelgun/",
+    "thumbnail": "https://picsum.photos/seed/pixelgun/400/300",
+    "source": "gibbat2.github.io"
+  },
+  {
+    "id": "getaway-shootout",
+    "title": "Getaway Shootout",
+    "description": "A chaotic two-player physics game where you race to the getaway vehicle. Jump, shoot, and use power-ups to outsmart your opponent!",
+    "url": "https://gibbat2.github.io/Games/games/getaway-shootout/",
+    "thumbnail": "https://picsum.photos/seed/getaway/400/300",
+    "source": "gibbat2.github.io"
   }
 ]

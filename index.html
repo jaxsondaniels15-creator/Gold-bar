@@ -22,6 +22,7 @@
             --ink: #ffffff;
             --accent: #ffb300;
             --line: rgba(255, 255, 255, 0.1);
+            --accent-color: #fbbf24;
         }
 
         body {
@@ -31,10 +32,60 @@
             overflow: hidden;
         }
 
+        .bg-amber-500 { background-color: var(--accent-color) !important; }
+        .text-amber-400 { color: var(--accent-color) !important; }
+        .border-amber-500\/50 { border-color: color-mix(in srgb, var(--accent-color) 50%, transparent) !important; }
+        .border-amber-500\/20 { border-color: color-mix(in srgb, var(--accent-color) 20%, transparent) !important; }
+        .bg-amber-500\/10 { background-color: color-mix(in srgb, var(--accent-color) 10%, transparent) !important; }
+        .bg-amber-500\/5 { background-color: color-mix(in srgb, var(--accent-color) 5%, transparent) !important; }
+        .focus\:border-amber-500\/50:focus { border-color: color-mix(in srgb, var(--accent-color) 50%, transparent) !important; }
+        .focus\:border-amber-500\/30:focus { border-color: color-mix(in srgb, var(--accent-color) 30%, transparent) !important; }
+        .hover\:bg-amber-400:hover { background-color: color-mix(in srgb, var(--accent-color) 80%, white) !important; }
+        .hover\:border-amber-500\/50:hover { border-color: color-mix(in srgb, var(--accent-color) 50%, transparent) !important; }
+        .hover\:shadow-amber-500\/10:hover { --tw-shadow-color: color-mix(in srgb, var(--accent-color) 10%, transparent) !important; }
+        .accent-amber-500 { accent-color: var(--accent-color) !important; }
+
+        /* Effects */
+        .effect-scanlines::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        .effect-vignette::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.5) 150%);
+            pointer-events: none;
+            z-index: 1000;
+        }
+        .effect-grain::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
         .glass {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
             border: 1px solid var(--line);
+        }
+
+        .game-card-glow:hover {
+            box-shadow: 0 0 20px color-mix(in srgb, var(--accent-color) 20%, transparent);
+            border-color: color-mix(in srgb, var(--accent-color) 40%, transparent);
+        }
+
+        .level-bar {
+            background: linear-gradient(90deg, var(--accent-color) 0%, color-mix(in srgb, var(--accent-color) 50%, white) 100%);
         }
 
         .neon-border {
@@ -167,7 +218,16 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body x-data="arcadeApp()" x-init="init()" :style="{ filter: `brightness(${settings.brightness}%)` }">
+<body 
+    x-data="arcadeApp()" 
+    x-init="init()" 
+    :class="{
+        'effect-scanlines': settings.bgEffect === 'scanlines',
+        'effect-vignette': settings.bgEffect === 'vignette',
+        'effect-grain': settings.bgEffect === 'grain'
+    }"
+    :style="{ filter: `brightness(${settings.brightness}%)` }"
+>
     
     <!-- CRT Overlay -->
     <div class="crt-overlay"></div>
@@ -197,41 +257,52 @@
     <div class="flex h-screen w-full overflow-hidden">
         
         <!-- Sidebar (Chat & Profile) -->
-        <aside class="w-80 border-r border-white/10 flex flex-col glass z-20">
+        <aside class="w-72 border-r border-white/10 flex flex-col glass z-20">
             <!-- User Profile Mini -->
-            <div class="p-6 border-b border-white/10">
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <img :src="profile.avatar" class="w-12 h-12 rounded-xl object-cover border border-white/20">
-                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border-2 border-black"></div>
+            <div class="p-4 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <div class="relative group cursor-pointer" @click="modals.profile = true">
+                            <img :src="profile.avatar" class="w-10 h-10 rounded-xl object-cover border border-white/20 group-hover:border-amber-500/50 transition-all">
+                            <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-black"></div>
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                                <i data-lucide="edit-2" class="w-3 h-3 text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-0.5">
+                                <h3 class="font-bold text-xs tracking-tight" x-text="profile.name"></h3>
+                                <span class="text-[8px] font-mono text-amber-400 uppercase tracking-widest">LVL <span x-text="profile.level"></span></span>
+                            </div>
+                            <!-- Level Progress Bar -->
+                            <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden border border-white/10">
+                                <div class="h-full level-bar transition-all duration-1000" :style="{ width: (profile.exp || 0) + '%' }"></div>
+                            </div>
+                            <p class="text-[7px] font-mono text-white/20 uppercase tracking-widest mt-0.5">Arcade_Pro_Unit</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-sm tracking-tight" x-text="profile.name"></h3>
-                        <p class="text-[10px] font-mono text-white/40 uppercase tracking-widest">Level <span x-text="profile.level"></span> Arcade Pro</p>
+                    <div class="flex gap-2 mt-3">
+                        <button @click="modals.profile = true" class="flex-1 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-[8px] font-mono uppercase tracking-widest text-white/60">Profile</button>
+                        <button @click="logout()" class="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors group">
+                            <i data-lucide="log-out" class="w-3 h-3 text-white/40 group-hover:text-red-500"></i>
+                        </button>
                     </div>
-                    <button @click="modals.profile = true" class="p-2 hover:bg-white/5 rounded-lg transition-colors">
-                        <i data-lucide="settings-2" class="w-4 h-4 text-white/40"></i>
-                    </button>
-                    <button @click="logout()" class="p-2 hover:bg-red-500/20 rounded-lg transition-colors group">
-                        <i data-lucide="log-out" class="w-4 h-4 text-white/40 group-hover:text-red-500"></i>
-                    </button>
-                </div>
             </div>
 
             <!-- Chat Tabs -->
             <div class="flex border-b border-white/10">
-                <button @click="chatTab = 'global'" :class="chatTab === 'global' ? 'border-amber-500 text-amber-400' : 'border-transparent text-white/40'" class="flex-1 py-3 text-[10px] font-mono uppercase tracking-widest border-b-2 transition-all">Global Chat</button>
-                <button @click="chatTab = 'requests'" :class="chatTab === 'requests' ? 'border-amber-500 text-amber-400' : 'border-transparent text-white/40'" class="flex-1 py-3 text-[10px] font-mono uppercase tracking-widest border-b-2 transition-all">Requests</button>
+                <button @click="chatTab = 'global'" :class="chatTab === 'global' ? 'border-amber-500 text-amber-400' : 'border-transparent text-white/40'" class="flex-1 py-2 text-[9px] font-mono uppercase tracking-widest border-b-2 transition-all">Global Chat</button>
+                <button @click="chatTab = 'requests'" :class="chatTab === 'requests' ? 'border-amber-500 text-amber-400' : 'border-transparent text-white/40'" class="flex-1 py-2 text-[9px] font-mono uppercase tracking-widest border-b-2 transition-all">Requests</button>
             </div>
 
             <!-- Chat Content -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar" x-ref="chatBox">
+            <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar" x-ref="chatBox">
                 <template x-if="chatTab === 'global'">
                     <template x-for="msg in messages" :key="msg.id">
                         <div class="space-y-1">
                             <div class="flex items-center gap-2">
                                 <span class="text-[10px] font-bold text-amber-400" x-text="msg.userName"></span>
-                                <span class="text-[9px] text-white/20 font-mono" x-text="formatTime(msg.timestamp)"></span>
+                                <span class="text-[9px] text-white/20 font-mono" x-text="formatDateTime(msg.timestamp)"></span>
+                                <button @click="replyToMessage(msg.userName)" class="text-[9px] text-amber-500/50 hover:text-amber-500 transition-colors uppercase tracking-widest font-bold">Reply</button>
                             </div>
                             <p class="text-xs text-white/70 leading-relaxed" x-text="msg.text"></p>
                         </div>
@@ -243,6 +314,7 @@
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="text-[10px] font-bold text-amber-400" x-text="req.userName"></span>
                                 <span class="text-[9px] text-white/20 font-mono">REQUESTED</span>
+                                <button @click="replyToMessage(req.userName)" class="text-[9px] text-amber-500/50 hover:text-amber-500 transition-colors uppercase tracking-widest font-bold">Reply</button>
                             </div>
                             <p class="text-xs text-white/80 italic" x-text="req.text"></p>
                         </div>
@@ -255,6 +327,7 @@
                 <template x-if="!isGuest">
                     <form @submit.prevent="sendMessage()" class="relative">
                         <input 
+                            x-ref="chatInput"
                             type="text" 
                             x-model="newMessage" 
                             :placeholder="chatTab === 'global' ? 'Type a message...' : 'Request a game...'"
@@ -278,20 +351,53 @@
         <main class="flex-1 flex flex-col relative overflow-hidden">
             
             <!-- Top Header -->
-            <header class="h-20 border-b border-white/10 flex items-center justify-between px-8 glass z-10">
-                <div class="flex items-center gap-8">
-                    <h1 class="text-xl font-black tracking-tighter italic glitch" data-text="GOLDBAR">GOLD<span class="text-amber-400">BAR</span></h1>
-                    <div class="relative w-96">
-                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20"></i>
+            <header class="h-16 border-b border-white/10 flex items-center justify-between px-6 glass z-10">
+                <div class="flex items-center gap-6">
+                    <h1 @click="window.location.href = settings.panicUrl" class="text-xl font-black tracking-tighter italic glitch cursor-pointer" data-text="GOLDBAR" title="BOSS_KEY: Click to Panic">GOLD<span class="text-amber-400">BAR</span></h1>
+                    <div class="relative w-80 group">
+                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-amber-400 transition-colors"></i>
                         <input 
                             type="text" 
                             x-model="searchQuery"
                             placeholder="SEARCH_VAULT..." 
-                            class="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-12 pr-4 text-xs font-mono focus:outline-none focus:border-amber-500/50 transition-all"
+                            class="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-12 pr-10 text-xs font-mono focus:outline-none focus:border-amber-500/50 transition-all"
                         >
+                        <button 
+                            x-show="searchQuery" 
+                            @click="searchQuery = ''" 
+                            class="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:text-amber-400 transition-colors"
+                        >
+                            <i data-lucide="x" class="w-3 h-3"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
+                    <!-- System Clock -->
+                    <div class="hidden lg:flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-xl">
+                        <i data-lucide="clock" class="w-3 h-3 text-white/40"></i>
+                        <span class="text-[10px] font-mono text-white/60 tracking-widest" x-text="currentTime"></span>
+                    </div>
+
+                    <!-- Random Game -->
+                    <button @click="randomGame()" class="hidden md:flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 hover:bg-amber-500/20 transition-all group">
+                        <i data-lucide="shuffle" class="w-3 h-3 group-hover:rotate-180 transition-transform duration-500"></i>
+                        <span class="text-[9px] font-bold uppercase tracking-widest">Random_Unit</span>
+                    </button>
+
+                    <!-- Panic Key Indicator -->
+                    <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
+                        <span class="text-[9px] font-mono uppercase tracking-widest">Panic:</span>
+                        <kbd class="px-1.5 py-0.5 bg-red-500/20 rounded border border-red-500/30 text-[10px] font-bold" x-text="settings.panicKey"></kbd>
+                        <span class="text-[8px] text-white/40 uppercase ml-1">Instant Hide</span>
+                    </div>
+
+                    <!-- Stealth Key Indicator -->
+                    <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-400">
+                        <span class="text-[9px] font-mono uppercase tracking-widest">Stealth:</span>
+                        <kbd class="px-1.5 py-0.5 bg-emerald-500/20 rounded border border-emerald-500/30 text-[10px] font-bold">\</kbd>
+                        <span class="text-[8px] text-white/40 uppercase ml-1">Swap Tab</span>
+                    </div>
+
                     <button x-show="isAdmin" @click="modals.admin = true" class="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 hover:bg-amber-500/20 transition-all flex items-center gap-2">
                         <i data-lucide="shield" class="w-4 h-4"></i>
                         <span class="text-[10px] font-bold uppercase tracking-widest">Admin_Panel</span>
@@ -310,25 +416,57 @@
                 </div>
             </header>
 
+            <!-- Category Pills -->
+            <div class="px-6 py-3 border-b border-white/5 bg-black/20 flex items-center gap-2 overflow-x-auto custom-scrollbar">
+                <template x-for="tab in ['all', 'action', 'puzzle', 'sports', 'retro', 'strategy']">
+                    <button 
+                        @click="activeTab = tab"
+                        class="px-4 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest transition-all border whitespace-nowrap"
+                        :class="activeTab === tab ? 'bg-amber-500 border-amber-500 text-black font-black' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20 hover:text-white'"
+                        x-text="tab"
+                    ></button>
+                </template>
+            </div>
+
             <!-- Scrollable Content -->
-            <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+            <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                
+                <!-- Welcome Greeting -->
+                <div class="mb-3">
+                    <h2 class="text-xl font-black italic tracking-tighter mb-0.5">
+                        <span x-text="getGreeting()"></span>, 
+                        <span class="text-amber-400" x-text="profile.name"></span>
+                    </h2>
+                    <p class="text-[9px] text-white/40 font-mono uppercase tracking-[0.3em]">System_Status: <span class="text-emerald-400">OPTIMAL</span> // Access_Granted</p>
+                </div>
+
+                <!-- Admin System Message -->
+                <div x-show="admin.systemMessage" class="mb-4 p-2.5 bg-amber-500/5 border border-amber-500/20 rounded-2xl flex items-center gap-3 animate-pulse">
+                    <div class="w-7 h-7 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
+                        <i data-lucide="megaphone" class="w-3.5 h-3.5 text-amber-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-[7px] font-mono text-amber-400 uppercase tracking-widest mb-0">System_Broadcast</p>
+                        <p class="text-[10px] font-bold italic" x-text="admin.systemMessage"></p>
+                    </div>
+                </div>
                 
                 <!-- Recently Played & Favorites -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12" x-show="profile.recentlyPlayed?.length || profile.favorites?.length">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" x-show="profile.recentlyPlayed?.length || profile.favorites?.length">
                     <!-- Recently Played -->
                     <div x-show="profile.recentlyPlayed?.length">
-                        <div class="flex items-center gap-3 mb-4">
-                            <i data-lucide="history" class="w-4 h-4 text-amber-400"></i>
-                            <h2 class="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40">Recently_Accessed</h2>
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="history" class="w-3 h-3 text-amber-400"></i>
+                            <h2 class="text-[8px] font-mono uppercase tracking-[0.2em] text-white/40">Recently_Accessed</h2>
                         </div>
-                        <div class="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                        <div class="flex gap-2.5 overflow-x-auto pb-1.5 custom-scrollbar">
                             <template x-for="id in profile.recentlyPlayed" :key="id">
                                 <template x-if="getGameById(id)">
-                                    <button @click="openGame(getGameById(id))" class="flex-shrink-0 w-32 group">
-                                        <div class="aspect-square rounded-xl overflow-hidden border border-white/10 mb-2 group-hover:border-amber-500/50 transition-all">
+                                    <button @click="openGame(getGameById(id))" class="flex-shrink-0 w-24 group">
+                                        <div class="aspect-square rounded-xl overflow-hidden border border-white/10 mb-1 group-hover:border-amber-500/50 transition-all game-card-glow">
                                             <img :src="getGameById(id).thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                                         </div>
-                                        <p class="text-[10px] font-bold truncate text-white/60 group-hover:text-white" x-text="getGameById(id).title"></p>
+                                        <p class="text-[8px] font-bold truncate text-white/60 group-hover:text-white" x-text="getGameById(id).title"></p>
                                     </button>
                                 </template>
                             </template>
@@ -337,18 +475,18 @@
 
                     <!-- Favorites -->
                     <div x-show="profile.favorites?.length">
-                        <div class="flex items-center gap-3 mb-4">
-                            <i data-lucide="heart" class="w-4 h-4 text-pink-500"></i>
-                            <h2 class="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40">Priority_Units</h2>
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="heart" class="w-3 h-3 text-pink-500"></i>
+                            <h2 class="text-[8px] font-mono uppercase tracking-[0.2em] text-white/40">Priority_Units</h2>
                         </div>
-                        <div class="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                        <div class="flex gap-2.5 overflow-x-auto pb-1.5 custom-scrollbar">
                             <template x-for="id in profile.favorites" :key="id">
                                 <template x-if="getGameById(id)">
-                                    <button @click="openGame(getGameById(id))" class="flex-shrink-0 w-32 group">
-                                        <div class="aspect-square rounded-xl overflow-hidden border border-white/10 mb-2 group-hover:border-pink-500/50 transition-all">
+                                    <button @click="openGame(getGameById(id))" class="flex-shrink-0 w-24 group">
+                                        <div class="aspect-square rounded-xl overflow-hidden border border-white/10 mb-1 group-hover:border-pink-500/50 transition-all game-card-glow">
                                             <img :src="getGameById(id).thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                                         </div>
-                                        <p class="text-[10px] font-bold truncate text-white/60 group-hover:text-white" x-text="getGameById(id).title"></p>
+                                        <p class="text-[8px] font-bold truncate text-white/60 group-hover:text-white" x-text="getGameById(id).title"></p>
                                     </button>
                                 </template>
                             </template>
@@ -356,12 +494,69 @@
                     </div>
                 </div>
 
+                <!-- Dashboard Widgets -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                    <!-- User Stats -->
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-2.5 flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-[9px] font-bold uppercase tracking-widest text-white/40 flex items-center gap-2">
+                                <i data-lucide="bar-chart-3" class="w-3 h-3"></i> UNIT_METRICS
+                            </h3>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="space-y-0.5">
+                                <p class="text-[7px] text-white/20 uppercase">Games_Played</p>
+                                <p class="text-lg font-black italic" x-text="profile.recentlyPlayed.length"></p>
+                            </div>
+                            <div class="space-y-0.5">
+                                <p class="text-[7px] text-white/20 uppercase">Last_Login</p>
+                                <p class="text-[9px] font-mono font-bold" x-text="profile.lastLogin"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Quick Notes -->
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-2.5 flex flex-col gap-2">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-[9px] font-bold uppercase tracking-widest text-white/40 flex items-center gap-2">
+                                <i data-lucide="edit-3" class="w-3 h-3"></i> STUDY_NOTES
+                            </h3>
+                            <span class="text-[7px] text-white/20 font-mono">AUTOSAVED</span>
+                        </div>
+                        <textarea 
+                            x-model="profile.notes" 
+                            placeholder="Type your homework notes here..." 
+                            class="w-full h-14 bg-black/20 border border-white/5 rounded-xl p-2 text-[11px] focus:outline-none focus:border-amber-500/30 transition-all resize-none custom-scrollbar"
+                        ></textarea>
+                    </div>
+                    <!-- Quick Calculator -->
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-3 flex flex-col gap-2">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-[9px] font-bold uppercase tracking-widest text-white/40 flex items-center gap-2">
+                                <i data-lucide="calculator" class="w-3 h-3"></i> QUICK_CALC
+                            </h3>
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <input 
+                                type="text" 
+                                x-model="calcInput" 
+                                @keyup.enter="calculate()"
+                                placeholder="2 + 2..." 
+                                class="w-full bg-black/20 border border-white/5 rounded-xl px-3 py-1.5 text-[11px] font-mono focus:outline-none focus:border-amber-500/30 transition-all"
+                            >
+                            <div class="flex items-center justify-between px-1">
+                                <span class="text-[9px] text-white/20 uppercase">Result:</span>
+                                <span class="text-[11px] font-mono text-amber-400" x-text="calcResult || '0'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Tabs -->
-                <div class="flex items-center gap-2 mb-10">
+                <div class="flex items-center gap-2 mb-5">
                     <button 
                         @click="activeTab = 'all'"
                         :class="activeTab === 'all' ? 'bg-amber-500 text-black font-bold' : 'bg-white/5 text-white/40 hover:text-white border border-white/5'"
-                        class="px-6 py-2 rounded-full text-[10px] font-mono uppercase tracking-widest transition-all"
+                        class="px-4 py-1 rounded-full text-[8px] font-mono uppercase tracking-widest transition-all"
                     >
                         All_Units
                     </button>
@@ -369,14 +564,14 @@
                         <button 
                             @click="activeTab = source"
                             :class="activeTab === source ? 'bg-amber-500 text-black font-bold' : 'bg-white/5 text-white/40 hover:text-white border border-white/5'"
-                            class="px-6 py-2 rounded-full text-[10px] font-mono uppercase tracking-widest transition-all"
+                            class="px-4 py-1 rounded-full text-[8px] font-mono uppercase tracking-widest transition-all"
                             x-text="source"
                         ></button>
                     </template>
                 </div>
 
                 <!-- Game Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                     <template x-for="game in filteredGames" :key="game.id">
                         <div 
                             class="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/10"
@@ -457,7 +652,13 @@
                     <button @click="showGameControls = !showGameControls" class="p-2 hover:bg-white/5 rounded-lg text-white/40 hover:text-amber-400 transition-colors" title="Game Controls">
                         <i data-lucide="keyboard" class="w-5 h-5"></i>
                     </button>
-                    <button @click="toggleFullscreen()" class="p-2 hover:bg-white/5 rounded-lg text-white/40 hover:text-white transition-colors">
+                    <button @click="settings.theaterMode = !settings.theaterMode" class="p-2 hover:bg-white/5 rounded-lg text-white/40 hover:text-amber-400 transition-colors" title="Theater Mode">
+                        <i data-lucide="monitor" class="w-5 h-5"></i>
+                    </button>
+                    <button @click="const url = selectedGame.url; selectedGame.url = ''; $nextTick(() => selectedGame.url = url)" class="p-2 hover:bg-white/5 rounded-lg text-white/40 hover:text-amber-400 transition-colors" title="Reload Game">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                    </button>
+                    <button @click="toggleFullscreen()" class="p-2 hover:bg-white/5 rounded-lg text-white/40 hover:text-white transition-colors" title="Fullscreen">
                         <i data-lucide="maximize" class="w-5 h-5"></i>
                     </button>
                     <button @click="closeGame()" class="p-2 hover:bg-red-500/20 rounded-lg text-white/40 hover:text-red-500 transition-colors">
@@ -467,7 +668,7 @@
             </div>
 
             <!-- Game Container -->
-            <div class="flex-1 bg-black relative flex">
+            <div class="flex-1 bg-black relative flex" :class="settings.theaterMode ? 'fixed inset-0 z-[100] bg-black' : ''">
                 <!-- Controls Sidebar (Optional) -->
                 <div x-show="showGameControls" x-transition class="w-64 border-r border-white/10 bg-zinc-950 p-6 space-y-6 overflow-y-auto custom-scrollbar">
                     <h3 class="text-[10px] font-mono text-amber-400 uppercase tracking-widest">Control_Map</h3>
@@ -492,16 +693,40 @@
                     </div>
                 </div>
 
-                <div class="flex-1 relative">
+                <div class="flex-1 relative group">
                     <template x-if="selectedGame">
-                        <iframe 
-                            :src="selectedGame.url" 
-                            class="w-full h-full border-none"
-                            allow="accelerometer *; ambient-light-sensor *; autoplay *; camera *; clipboard-read *; clipboard-write *; encrypted-media *; fullscreen *; geolocation *; gyroscope *; local-network-access *; magnetometer *; microphone *; midi *; payment *; picture-in-picture *; screen-wake-lock *; speaker *; sync-xhr *; usb *; vibrate *; vr *; web-share *; pointer-lock *"
-                            :title="selectedGame.title"
-                            tabindex="0"
-                            sandbox="allow-downloads allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-pointer-lock allow-orientation-lock allow-presentation"
-                        ></iframe>
+                        <div class="w-full h-full relative" :class="settings.theaterMode ? 'fixed inset-0 z-[100] bg-black' : ''">
+                            <!-- Theater Mode Exit Button -->
+                            <button 
+                                x-show="settings.theaterMode"
+                                @click="settings.theaterMode = false"
+                                class="absolute top-4 right-4 z-[110] bg-zinc-900/80 hover:bg-zinc-800 text-white p-2 rounded-lg border border-white/10 transition-colors flex items-center gap-2 text-xs"
+                            >
+                                <i data-lucide="minimize-2" class="w-4 h-4"></i>
+                                Exit Theater
+                            </button>
+                            <iframe 
+                                :src="selectedGame.url" 
+                                class="w-full h-full border-none"
+                                allow="accelerometer *; ambient-light-sensor *; autoplay *; camera *; clipboard-read *; clipboard-write *; encrypted-media *; fullscreen *; geolocation *; gyroscope *; local-network-access *; magnetometer *; microphone *; midi *; payment *; picture-in-picture *; screen-wake-lock *; speaker *; sync-xhr *; usb *; vibrate *; vr *; web-share *; pointer-lock *"
+                                :title="selectedGame.title"
+                                tabindex="0"
+                                sandbox="allow-downloads allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-pointer-lock allow-orientation-lock allow-presentation"
+                            ></iframe>
+                            
+                            <!-- Game Controls Overlay -->
+                            <div class="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-[110]">
+                                <button @click="settings.theaterMode = !settings.theaterMode" class="p-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-white/60 hover:text-amber-400 transition-all" title="Theater Mode">
+                                    <i data-lucide="monitor" class="w-4 h-4"></i>
+                                </button>
+                                <button @click="$el.closest('div').querySelector('iframe').requestFullscreen()" class="p-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-white/60 hover:text-amber-400 transition-all" title="Fullscreen">
+                                    <i data-lucide="maximize" class="w-4 h-4"></i>
+                                </button>
+                                <button @click="const url = selectedGame.url; selectedGame.url = ''; $nextTick(() => selectedGame.url = url)" class="p-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-white/60 hover:text-amber-400 transition-all" title="Reload Game">
+                                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
                     </template>
                 </div>
             </div>
@@ -549,53 +774,177 @@
     </div>
 
     <!-- Admin Modal -->
-    <div x-show="modals.admin" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div x-show="modals.admin" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center p-4" x-data="{ adminTab: 'dashboard' }">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="modals.admin = false"></div>
-        <div class="relative w-full max-w-2xl bg-zinc-900 border border-amber-500/30 rounded-3xl p-8 shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-            <h2 class="text-2xl font-black italic mb-6">ADMIN<span class="text-amber-400">_CONTROL</span></h2>
-            <div class="flex-1 overflow-y-auto space-y-6 custom-scrollbar pr-2">
-                <div class="p-6 bg-amber-500/5 border border-amber-500/20 rounded-2xl">
-                    <h3 class="text-xs font-bold uppercase tracking-widest mb-4 text-amber-400">System_Status</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 bg-black/40 rounded-xl border border-white/5">
-                            <p class="text-[9px] text-white/40 uppercase mb-1">Total_Users</p>
-                            <p class="text-xl font-black">--</p>
+        <div class="relative w-full max-w-3xl bg-zinc-900 border border-amber-500/30 rounded-3xl p-0 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <!-- Header -->
+            <div class="p-8 pb-4 flex items-center justify-between border-b border-white/5">
+                <h2 class="text-2xl font-black italic">ADMIN<span class="text-amber-400">_CONTROL</span></h2>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full">
+                        <div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                        <span class="text-[10px] font-mono text-amber-400 uppercase tracking-widest">System_Live</span>
+                    </div>
+                    <button @click="modals.admin = false" class="p-2 hover:bg-white/5 rounded-xl transition-all">
+                        <i data-lucide="x" class="w-5 h-5 text-white/40"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex px-8 border-b border-white/5">
+                <template x-for="tab in ['dashboard', 'games', 'users', 'logs']">
+                    <button 
+                        @click="adminTab = tab"
+                        class="px-6 py-4 text-[10px] font-mono uppercase tracking-widest transition-all border-b-2"
+                        :class="adminTab === tab ? 'text-amber-400 border-amber-400' : 'text-white/40 border-transparent hover:text-white'"
+                        x-text="tab"
+                    ></button>
+                </template>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                <!-- Dashboard Tab -->
+                <div x-show="adminTab === 'dashboard'" class="space-y-6">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="p-3 bg-white/5 border border-white/10 rounded-2xl">
+                            <p class="text-[8px] text-white/40 uppercase mb-0.5">Total_Users</p>
+                            <p class="text-xl font-black" x-text="admin.stats.totalUsers"></p>
                         </div>
-                        <div class="p-4 bg-black/40 rounded-xl border border-white/5">
-                            <p class="text-[9px] text-white/40 uppercase mb-1">Active_Sessions</p>
-                            <p class="text-xl font-black">--</p>
+                        <div class="p-3 bg-white/5 border border-white/10 rounded-2xl">
+                            <p class="text-[8px] text-white/40 uppercase mb-0.5">Active_Sessions</p>
+                            <p class="text-xl font-black" x-text="admin.stats.activeSessions"></p>
+                        </div>
+                        <div class="p-3 bg-white/5 border border-white/10 rounded-2xl">
+                            <p class="text-[8px] text-white/40 uppercase mb-0.5">Total_Games</p>
+                            <p class="text-xl font-black" x-text="games.length"></p>
+                        </div>
+                        <div class="p-3 bg-white/5 border border-white/10 rounded-2xl">
+                            <p class="text-[8px] text-white/40 uppercase mb-0.5">Server_Load</p>
+                            <p class="text-xl font-black text-emerald-400" x-text="admin.stats.serverLoad"></p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-mono text-white/40 uppercase tracking-widest block">System_Broadcast_Message</label>
+                        <textarea 
+                            x-model="admin.systemMessage"
+                            class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-xs focus:outline-none focus:border-amber-500/50 transition-all resize-none h-20"
+                            placeholder="Enter a message to broadcast to all users..."
+                        ></textarea>
+                    </div>
+
+                    <!-- System Health -->
+                    <div class="mt-6 p-4 bg-white/5 border border-white/10 rounded-2xl">
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2">
+                            <i data-lucide="activity" class="w-3.5 h-3.5"></i> SYSTEM_HEALTH
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] text-white/40 uppercase">Database_Latency</span>
+                                <span class="text-[10px] font-mono text-emerald-400">12ms</span>
+                            </div>
+                            <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 h-full w-[12%]"></div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] text-white/40 uppercase">Memory_Usage</span>
+                                <span class="text-[10px] font-mono text-amber-400">128MB / 512MB</span>
+                            </div>
+                            <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
+                                <div class="bg-amber-500 h-full w-[25%]"></div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] text-white/40 uppercase">Uptime</span>
+                                <span class="text-[10px] font-mono text-blue-400">99.98%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="space-y-4">
-                    <h3 class="text-xs font-bold uppercase tracking-widest text-white/40">Restricted_Actions</h3>
-                    <button @click="alert('Feature coming soon: User Management')" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between hover:bg-white/10 transition-all">
-                        <span class="text-xs font-bold">MANAGE_USERS</span>
-                        <i data-lucide="users" class="w-4 h-4 text-white/40"></i>
-                    </button>
-                    <button @click="alert('Feature coming soon: Game Editor')" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between hover:bg-white/10 transition-all">
-                        <span class="text-xs font-bold">EDIT_GAME_DATABASE</span>
-                        <i data-lucide="database" class="w-4 h-4 text-white/40"></i>
-                    </button>
+
+                <!-- Games Tab -->
+                <div x-show="adminTab === 'games'" class="space-y-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-white/40">Game_Database</h3>
+                        <button @click="editGame()" class="px-4 py-2 bg-amber-500 text-black text-[10px] font-black uppercase rounded-xl hover:bg-amber-400 transition-all">
+                            Add_New_Game
+                        </button>
+                    </div>
+                    <div class="space-y-2">
+                        <template x-for="game in games" :key="game.id">
+                            <div class="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between group">
+                                <div class="flex items-center gap-3">
+                                    <img :src="game.thumbnail" class="w-10 h-10 rounded-lg object-cover">
+                                    <div>
+                                        <p class="text-xs font-bold" x-text="game.title"></p>
+                                        <p class="text-[9px] text-white/40 uppercase" x-text="game.category"></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                    <button @click="editGame(game)" class="p-2 hover:bg-white/10 rounded-lg text-white/40 hover:text-white">
+                                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                    </button>
+                                    <button @click="deleteGame(game.id)" class="p-2 hover:bg-red-500/20 rounded-lg text-white/40 hover:text-red-400">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Users Tab -->
+                <div x-show="adminTab === 'users'" class="space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-white/40">User_Management</h3>
+                    <div class="p-8 bg-white/5 border border-white/10 rounded-2xl text-center">
+                        <i data-lucide="users" class="w-12 h-12 text-white/10 mx-auto mb-4"></i>
+                        <p class="text-xs text-white/40 italic">User database connection pending...</p>
+                        <button @click="alert('Simulating user fetch...')" class="mt-4 text-[10px] font-mono text-amber-400 uppercase hover:underline">Retry_Sync</button>
+                    </div>
+                </div>
+
+                <!-- Logs Tab -->
+                <div x-show="adminTab === 'logs'" class="space-y-3">
+                    <template x-for="log in admin.logs" :key="log.id">
+                        <div class="p-3 bg-black/40 border-l-2 rounded-r-xl flex items-center justify-between"
+                             :class="{
+                                'border-blue-500': log.type === 'info',
+                                'border-amber-500': log.type === 'warning',
+                                'border-emerald-500': log.type === 'success',
+                                'border-red-500': log.type === 'danger'
+                             }">
+                            <div class="flex items-center gap-3">
+                                <div class="w-1.5 h-1.5 rounded-full"
+                                     :class="{
+                                        'bg-blue-500': log.type === 'info',
+                                        'bg-amber-500': log.type === 'warning',
+                                        'bg-emerald-500': log.type === 'success',
+                                        'bg-red-500': log.type === 'danger'
+                                     }"></div>
+                                <span class="text-[11px] font-medium" x-text="log.message"></span>
+                            </div>
+                            <span class="text-[9px] font-mono text-white/20" x-text="log.time"></span>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
     </div>
     <div x-show="modals.profile" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="modals.profile = false"></div>
-        <div class="relative w-full max-w-md bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl">
-            <h2 class="text-2xl font-black italic mb-6">USER<span class="text-amber-400">_PROFILE</span></h2>
+        <div class="relative w-full max-w-md bg-zinc-900 border border-white/10 rounded-3xl p-6 shadow-2xl">
+            <h2 class="text-xl font-black italic mb-4">USER<span class="text-amber-400">_PROFILE</span></h2>
             
-            <div class="space-y-6">
+            <div class="space-y-4">
                 <!-- Avatar Selection -->
                 <div>
-                    <label class="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-3 block">Identity_Core</label>
-                    <div class="flex flex-wrap gap-3">
+                    <label class="text-[9px] font-mono text-white/40 uppercase tracking-widest mb-2 block">Identity_Core</label>
+                    <div class="flex flex-wrap gap-2">
                         <template x-for="avatar in avatars" :key="avatar">
                             <button 
                                 @click="profile.avatar = avatar"
-                                class="w-14 h-14 rounded-xl overflow-hidden border-2 transition-all"
+                                class="w-12 h-12 rounded-xl overflow-hidden border-2 transition-all"
                                 :class="profile.avatar === avatar ? 'border-amber-500 scale-110' : 'border-transparent opacity-40 hover:opacity-100'"
                             >
                                 <img :src="avatar" class="w-full h-full object-cover">
@@ -606,31 +955,31 @@
 
                 <!-- Name Input -->
                 <div>
-                    <label class="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-2 block">Callsign</label>
+                    <label class="text-[9px] font-mono text-white/40 uppercase tracking-widest mb-1.5 block">Callsign</label>
                     <input 
                         type="text" 
                         x-model="profile.name"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-amber-500/50 transition-all"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-amber-500/50 transition-all"
                     >
                 </div>
 
                 <!-- Achievements -->
                 <div>
-                    <label class="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-3 block">Milestones_Reached</label>
-                    <div class="grid grid-cols-2 gap-3">
+                    <label class="text-[9px] font-mono text-white/40 uppercase tracking-widest mb-2 block">Milestones_Reached</label>
+                    <div class="grid grid-cols-2 gap-2">
                         <template x-for="ach in allAchievements" :key="ach.id">
                             <div 
-                                class="p-3 rounded-xl border transition-all flex items-center gap-3"
+                                class="p-2.5 rounded-xl border transition-all flex items-center gap-2.5"
                                 :class="hasAchievement(ach.id) ? 'bg-amber-500/10 border-amber-500/50' : 'bg-white/5 border-white/5 opacity-30'"
                             >
-                                <i :data-lucide="ach.icon" class="w-4 h-4" :class="hasAchievement(ach.id) ? 'text-amber-400' : 'text-white/40'"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-tight" x-text="ach.name"></span>
+                                <i :data-lucide="ach.icon" class="w-3.5 h-3.5" :class="hasAchievement(ach.id) ? 'text-amber-400' : 'text-white/40'"></i>
+                                <span class="text-[9px] font-bold uppercase tracking-tight" x-text="ach.name"></span>
                             </div>
                         </template>
                     </div>
                 </div>
 
-                <button @click="saveProfile()" class="w-full bg-amber-500 text-black font-black py-4 rounded-2xl hover:bg-amber-400 transition-all uppercase tracking-widest text-xs">
+                <button @click="saveProfile()" class="w-full bg-amber-500 text-black font-black py-3 rounded-2xl hover:bg-amber-400 transition-all uppercase tracking-widest text-[10px]">
                     Update_System_Data
                 </button>
             </div>
@@ -640,17 +989,149 @@
     <!-- Settings Modal -->
     <div x-show="modals.settings" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="modals.settings = false"></div>
-        <div class="relative w-full max-w-md bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl">
-            <h2 class="text-2xl font-black italic mb-6">SYSTEM<span class="text-amber-400">_CONFIG</span></h2>
+        <div class="relative w-full max-w-md bg-zinc-900 border border-white/10 rounded-3xl p-6 shadow-2xl overflow-y-auto max-h-[90vh] custom-scrollbar">
+            <h2 class="text-xl font-black italic mb-4">SYSTEM<span class="text-amber-400">_CONFIG</span></h2>
             
-            <div class="space-y-8">
-                <!-- Brightness -->
+            <div class="space-y-6">
+                <!-- Anti-Blocking -->
+                <div class="p-3 bg-amber-500/5 border border-amber-500/20 rounded-2xl space-y-3">
+                    <h3 class="text-[9px] font-mono text-amber-400 uppercase tracking-widest">Stealth_Protocols</h3>
+                    
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-white/40">Stealth_Protocols</h3>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-bold">TAB_CLOAKING</p>
+                                <p class="text-[9px] text-white/40">Disguise tab as educational site</p>
+                            </div>
+                            <button 
+                                @click="settings.cloakMode = !settings.cloakMode"
+                                class="w-12 h-6 rounded-full transition-all relative border border-white/10"
+                                :class="settings.cloakMode ? 'bg-amber-500' : 'bg-white/5'"
+                            >
+                                <div class="absolute top-1 w-4 h-4 rounded-full bg-white transition-all" :class="settings.cloakMode ? 'left-7' : 'left-1'"></div>
+                            </button>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[9px] text-white/40 uppercase block">Cloak_Preset</label>
+                            <select 
+                                x-model="settings.cloakPreset"
+                                class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500/50 transition-all"
+                            >
+                                <option value="classroom" class="bg-zinc-900">Google Classroom</option>
+                                <option value="canvas" class="bg-zinc-900">Canvas Dashboard</option>
+                                <option value="drive" class="bg-zinc-900">Google Drive</option>
+                                <option value="grades" class="bg-zinc-900">Grades & Attendance</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-bold">AUTO_CLOAK_ON_BLUR</p>
+                                <p class="text-[9px] text-white/40">Cloak automatically when switching tabs</p>
+                            </div>
+                            <button 
+                                @click="settings.autoCloakOnBlur = !settings.autoCloakOnBlur"
+                                class="w-12 h-6 rounded-full transition-all relative border border-white/10"
+                                :class="settings.autoCloakOnBlur ? 'bg-amber-500' : 'bg-white/5'"
+                            >
+                                <div class="absolute top-1 w-4 h-4 rounded-full bg-white transition-all" :class="settings.autoCloakOnBlur ? 'left-7' : 'left-1'"></div>
+                            </button>
+                        </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold">ABOUT:BLANK_CLOAK</p>
+                            <p class="text-[9px] text-white/40">Open games in a hidden tab</p>
+                        </div>
+                        <button 
+                            @click="settings.blankCloak = !settings.blankCloak"
+                            class="w-12 h-6 rounded-full transition-all relative border border-white/10"
+                            :class="settings.blankCloak ? 'bg-amber-500' : 'bg-white/5'"
+                        >
+                            <div class="absolute top-1 w-4 h-4 rounded-full bg-white transition-all" :class="settings.blankCloak ? 'left-7' : 'left-1'"></div>
+                        </button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[9px] text-white/40 uppercase block">Panic_Key (Redirects to URL)</label>
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                x-model="settings.panicKey"
+                                @change="localStorage.setItem('arcade_panic_key', settings.panicKey)"
+                                class="flex-1 bg-white/5 border border-white/10 rounded-lg py-1.5 px-3 text-[10px] focus:outline-none focus:border-amber-500/50"
+                                placeholder="Key (e.g. ])"
+                            >
+                            <input 
+                                type="text" 
+                                x-model="settings.panicUrl"
+                                @change="localStorage.setItem('arcade_panic_url', settings.panicUrl)"
+                                class="flex-[2] bg-white/5 border border-white/10 rounded-lg py-1.5 px-3 text-[10px] focus:outline-none focus:border-amber-500/50"
+                                placeholder="Redirect URL"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Intensity -->
                 <div>
                     <div class="flex justify-between mb-4">
                         <label class="text-[10px] font-mono text-white/40 uppercase tracking-widest">Visual_Intensity</label>
                         <span class="text-[10px] font-mono text-amber-400" x-text="settings.brightness + '%'"></span>
                     </div>
                     <input type="range" x-model="settings.brightness" min="50" max="150" class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                </div>
+
+                <!-- Customization -->
+                <div class="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-6">
+                    <h3 class="text-[10px] font-mono text-white/40 uppercase tracking-widest">Personalization</h3>
+                    
+                    <!-- Accent Color -->
+                    <div class="space-y-3">
+                        <label class="text-[9px] text-white/40 uppercase block">Accent_Color</label>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="color in ['#fbbf24', '#ef4444', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899']">
+                                <button 
+                                    @click="settings.accentColor = color"
+                                    class="w-8 h-8 rounded-full border-2 transition-all"
+                                    :style="'background-color: ' + color"
+                                    :class="settings.accentColor === color ? 'border-white scale-110' : 'border-transparent opacity-50 hover:opacity-100'"
+                                ></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Background Effects -->
+                    <div class="space-y-3">
+                        <label class="text-[9px] text-white/40 uppercase block">Environment_Effect</label>
+                        <select 
+                            x-model="settings.bgEffect"
+                            class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500/50 transition-all"
+                        >
+                            <option value="none" class="bg-zinc-900">None</option>
+                            <option value="scanlines" class="bg-zinc-900">Retro Scanlines</option>
+                            <option value="vignette" class="bg-zinc-900">Dramatic Vignette</option>
+                            <option value="grain" class="bg-zinc-900">Film Grain</option>
+                        </select>
+                    </div>
+
+                    <!-- Sound Effects Toggle -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold">SOUND_EFFECTS</p>
+                            <p class="text-[9px] text-white/40">UI interactions and feedback</p>
+                        </div>
+                        <button 
+                            @click="settings.soundEffects = !settings.soundEffects"
+                            class="w-12 h-6 rounded-full transition-all relative border border-white/10"
+                            :class="settings.soundEffects ? 'bg-amber-500' : 'bg-white/5'"
+                        >
+                            <div class="absolute top-1 w-4 h-4 rounded-full bg-white transition-all" :class="settings.soundEffects ? 'left-7' : 'left-1'"></div>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Volume -->
@@ -663,7 +1144,7 @@
                 </div>
 
                 <!-- Game Specific Controls -->
-                <div>
+                <div class="mb-8">
                     <label class="text-[10px] font-mono text-white/40 uppercase tracking-widest mb-4 block">Control_Mapping</label>
                     <div class="space-y-3">
                         <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
@@ -677,7 +1158,21 @@
                     </div>
                 </div>
 
-                <button @click="modals.settings = false" class="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-amber-400 transition-all uppercase tracking-widest text-xs">
+                <!-- Danger Zone -->
+                <div class="mb-8 p-6 bg-red-500/5 border border-red-500/20 rounded-2xl">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-red-400 mb-4 flex items-center gap-2">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i> DANGER_ZONE
+                    </h3>
+                    <p class="text-[10px] text-white/40 mb-4">Wipe all local data, including settings, favorites, and profile. This action is irreversible.</p>
+                    <button 
+                        @click="if(confirm('WIPE ALL DATA? This cannot be undone.')) { localStorage.clear(); window.location.reload(); }"
+                        class="px-6 py-2 bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/50 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all"
+                    >
+                        WIPE_LOCAL_STORAGE
+                    </button>
+                </div>
+
+                <button @click="modals.settings = false" class="w-full bg-white text-black font-black py-3 rounded-2xl hover:bg-amber-400 transition-all uppercase tracking-widest text-[10px]">
                     Apply_Changes
                 </button>
             </div>
@@ -687,8 +1182,8 @@
     <!-- Review Modal -->
     <div x-show="modals.reviews" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="modals.reviews = false"></div>
-        <div class="relative w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-3xl p-8 shadow-2xl flex flex-col max-h-[80vh]">
-            <div class="flex items-center justify-between mb-6">
+        <div class="relative w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-3xl p-6 shadow-2xl flex flex-col max-h-[80vh]">
+            <div class="flex items-center justify-between mb-4">
                 <h2 class="text-2xl font-black italic">GAME<span class="text-amber-400">_FEEDBACK</span></h2>
                 <div class="flex items-center gap-2 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
                     <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
@@ -697,68 +1192,119 @@
             </div>
 
             <!-- Reviews List -->
-            <div class="flex-1 overflow-y-auto space-y-4 mb-6 custom-scrollbar pr-2">
+            <div class="flex-1 overflow-y-auto space-y-3 mb-5 custom-scrollbar pr-2">
                 <template x-for="rev in (gameRatings[reviewGame?.id] || [])" :key="rev.id">
-                    <div class="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-3">
+                    <div class="p-3 bg-white/5 rounded-xl border border-white/5 space-y-2">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-1.5">
                                 <span class="text-xs font-bold text-amber-400" x-text="rev.userName"></span>
                                 <div class="flex gap-0.5">
                                     <template x-for="i in 5">
-                                        <i data-lucide="star" class="w-2.5 h-2.5" :class="i <= rev.rating ? 'text-amber-400 fill-amber-400' : 'text-white/10'"></i>
+                                        <i data-lucide="star" class="w-2 h-2" :class="i <= rev.rating ? 'text-amber-400 fill-amber-400' : 'text-white/10'"></i>
                                     </template>
                                 </div>
                             </div>
-                            <span class="text-[9px] font-mono text-white/20" x-text="formatDate(rev.timestamp)"></span>
+                            <span class="text-[8px] font-mono text-white/20" x-text="formatDate(rev.timestamp)"></span>
                         </div>
-                        <p class="text-xs text-white/70 italic" x-text="rev.review"></p>
+                        <p class="text-[10px] text-white/70 italic" x-text="rev.review"></p>
                         
                         <!-- Replies -->
-                        <div class="pl-4 border-l border-white/10 space-y-3">
+                        <div class="pl-3 border-l border-white/10 space-y-2">
                             <template x-for="reply in rev.replies" :key="reply.id">
-                                <div class="text-[10px]">
+                                <div class="text-[9px]">
                                     <span class="font-bold text-amber-400" x-text="reply.userName"></span>
-                                    <span class="text-white/60 ml-2" x-text="reply.text"></span>
+                                    <span class="text-white/60 ml-1.5" x-text="reply.text"></span>
                                 </div>
                             </template>
-                            <button x-show="!isGuest" @click="replyToReview(rev)" class="text-[9px] font-mono text-amber-400 hover:underline uppercase tracking-widest">Reply_To_Signal</button>
+                            <button x-show="!isGuest" @click="replyToReview(rev)" class="text-[8px] font-mono text-amber-400 hover:underline uppercase tracking-widest">Reply_To_Signal</button>
                         </div>
                     </div>
                 </template>
                 <template x-if="!(gameRatings[reviewGame?.id] || []).length">
-                    <div class="h-40 flex flex-col items-center justify-center text-white/20">
-                        <i data-lucide="database" class="w-8 h-8 mb-2"></i>
-                        <p class="text-[10px] font-mono uppercase tracking-widest">No_Data_Found</p>
+                    <div class="h-32 flex flex-col items-center justify-center text-white/20">
+                        <i data-lucide="database" class="w-6 h-6 mb-1.5"></i>
+                        <p class="text-[9px] font-mono uppercase tracking-widest">No_Data_Found</p>
                     </div>
                 </template>
             </div>
 
             <!-- Add Review -->
-            <div class="pt-6 border-t border-white/10" x-show="!isGuest">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="flex gap-2">
+            <div class="pt-4 border-t border-white/10" x-show="!isGuest">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="flex gap-1.5">
                         <template x-for="i in 5">
-                            <button @click="newRating = i" class="transition-all hover:scale-125">
-                                <i data-lucide="star" class="w-6 h-6" :class="i <= newRating ? 'text-amber-400 fill-amber-400' : 'text-white/10'"></i>
+                            <button @click="newRating = i" class="transition-all hover:scale-110">
+                                <i data-lucide="star" class="w-5 h-5" :class="i <= newRating ? 'text-amber-400 fill-amber-400' : 'text-white/10'"></i>
                             </button>
                         </template>
                     </div>
-                    <span class="text-[10px] font-mono text-white/40 uppercase tracking-widest">Rate_Experience</span>
+                    <span class="text-[9px] font-mono text-white/40 uppercase tracking-widest">Rate_Experience</span>
                 </div>
                 <div class="relative">
                     <textarea 
                         x-model="newReview" 
                         placeholder="Transmit your feedback..."
-                        class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-4 text-xs focus:outline-none focus:border-amber-500/50 transition-all min-h-[100px] resize-none"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-3 text-[10px] focus:outline-none focus:border-amber-500/50 transition-all min-h-[90px] resize-none"
                     ></textarea>
-                    <button @click="submitRating()" class="absolute bottom-4 right-4 bg-amber-500 text-black p-2 rounded-xl hover:bg-amber-400 transition-all">
-                        <i data-lucide="send" class="w-4 h-4"></i>
+                    <button @click="submitRating()" class="absolute bottom-3 right-3 bg-amber-500 text-black p-1.5 rounded-lg hover:bg-amber-400 transition-all">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
                     </button>
                 </div>
             </div>
-            <div class="pt-6 border-t border-white/10 text-center" x-show="isGuest">
-                <p class="text-[10px] font-mono text-white/20 uppercase tracking-widest mb-2">Sign_In_To_Submit_Feedback</p>
-                <button @click="modals.auth = true; isGuest = false" class="text-xs font-bold text-amber-400 hover:underline uppercase tracking-widest">Connect_Now</button>
+            <div class="pt-4 border-t border-white/10 text-center" x-show="isGuest">
+                <p class="text-[9px] font-mono text-white/20 uppercase tracking-widest mb-1.5">Sign_In_To_Submit_Feedback</p>
+                <button @click="modals.auth = true; isGuest = false" class="text-[10px] font-bold text-amber-400 hover:underline uppercase tracking-widest">Connect_Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Editor Modal -->
+    <div x-show="admin.gameEditor.show" x-cloak class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" @click="admin.gameEditor.show = false"></div>
+        <div class="relative w-full max-w-lg bg-zinc-900 border border-white/10 rounded-3xl p-6 shadow-2xl">
+            <h2 class="text-xl font-black italic mb-6">GAME<span class="text-amber-400">_EDITOR</span></h2>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-[9px] font-mono text-white/40 uppercase tracking-widest">Game_Title</label>
+                        <input type="text" x-model="admin.gameEditor.game.title" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500/50 transition-all">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[9px] font-mono text-white/40 uppercase tracking-widest">Category</label>
+                        <select x-model="admin.gameEditor.game.category" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500/50 transition-all text-white">
+                            <option value="Action" class="bg-zinc-900">Action</option>
+                            <option value="Sports" class="bg-zinc-900">Sports</option>
+                            <option value="Casual" class="bg-zinc-900">Casual</option>
+                            <option value="Retro" class="bg-zinc-900">Retro</option>
+                            <option value="Strategy" class="bg-zinc-900">Strategy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[9px] font-mono text-white/40 uppercase tracking-widest">Game_URL</label>
+                    <input type="text" x-model="admin.gameEditor.game.url" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500/50 transition-all">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[9px] font-mono text-white/40 uppercase tracking-widest">Thumbnail_URL</label>
+                    <input type="text" x-model="admin.gameEditor.game.thumbnail" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500/50 transition-all">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[9px] font-mono text-white/40 uppercase tracking-widest">Description</label>
+                    <textarea x-model="admin.gameEditor.game.description" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-500/50 transition-all h-20 resize-none"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button @click="admin.gameEditor.show = false" class="flex-1 bg-white/5 text-white font-bold py-3 rounded-2xl hover:bg-white/10 transition-all uppercase tracking-widest text-[10px]">
+                        Cancel
+                    </button>
+                    <button @click="saveGame()" class="flex-1 bg-amber-500 text-black font-black py-3 rounded-2xl hover:bg-amber-400 transition-all uppercase tracking-widest text-[10px]">
+                        Save_Unit
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -800,20 +1346,52 @@
                 gameRequests: [],
                 gameRatings: {},
                 
+                admin: {
+                    stats: {
+                        totalUsers: 1,
+                        activeSessions: 1,
+                        serverLoad: 'Normal'
+                    },
+                    logs: [
+                        { id: 1, type: 'info', message: 'System boot successful', time: '10:00 AM' },
+                        { id: 2, type: 'warning', message: 'High traffic detected', time: '11:30 AM' },
+                        { id: 3, type: 'success', message: 'New game "Neon Drift" added', time: '12:15 PM' }
+                    ],
+                    systemMessage: 'All systems operational. Welcome to the Arcade.',
+                    gameEditor: {
+                        show: false,
+                        game: null
+                    }
+                },
+
                 profile: {
                     userId: localStorage.getItem('arcade_uid') || 'user_' + Math.random().toString(36).substr(2, 9),
                     name: localStorage.getItem('arcade_name') || 'Guest_Unit',
                     avatar: localStorage.getItem('arcade_avatar') || 'https://picsum.photos/seed/arcade1/200/200',
                     level: 1,
+                    exp: 45, // Initial experience for visual bar
+                    memberSince: new Date().toLocaleDateString([], { month: 'short', year: 'numeric' }),
+                    lastLogin: new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
                     achievements: [],
                     recentlyPlayed: [],
                     favorites: [],
+                    notes: localStorage.getItem('arcade_notes') || '',
                     gameControls: {}
                 },
 
                 settings: {
                     brightness: localStorage.getItem('arcade_brightness') || 100,
-                    volume: localStorage.getItem('arcade_volume') || 80
+                    volume: localStorage.getItem('arcade_volume') || 80,
+                    cloakMode: localStorage.getItem('arcade_cloak') !== 'false',
+                    cloakPreset: localStorage.getItem('arcade_cloak_preset') || 'classroom',
+                    autoCloakOnBlur: localStorage.getItem('arcade_auto_cloak_blur') !== 'false',
+                    blankCloak: localStorage.getItem('arcade_blank_cloak') !== 'false',
+                    theaterMode: false,
+                    panicKey: localStorage.getItem('arcade_panic_key') || ']',
+                    panicUrl: localStorage.getItem('arcade_panic_url') || 'https://classroom.google.com',
+                    accentColor: localStorage.getItem('arcade_accent_color') || '#fbbf24', // Default amber-400
+                    bgEffect: localStorage.getItem('arcade_bg_effect') || 'none',
+                    soundEffects: localStorage.getItem('arcade_sounds') !== 'false'
                 },
 
                 modals: {
@@ -823,6 +1401,9 @@
                     auth: false,
                     admin: false
                 },
+
+                calcInput: '',
+                calcResult: '',
 
                 loginLoading: false,
                 loading: true,
@@ -855,7 +1436,127 @@
                     { id: 'chat_active', name: 'Social Unit', icon: 'message-circle' }
                 ],
 
+                addLog(message, type = 'info') {
+                    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    this.admin.logs.unshift({ id: Date.now(), type, message, time });
+                    if (this.admin.logs.length > 10) this.admin.logs.pop();
+                },
+
+                deleteGame(gameId) {
+                    this.games = this.games.filter(g => g.id !== gameId);
+                    this.addLog(`Game ${gameId} deleted`, 'danger');
+                },
+
+                editGame(game = null) {
+                    if (game) {
+                        this.admin.gameEditor.game = { ...game };
+                    } else {
+                        this.admin.gameEditor.game = {
+                            id: 'game_' + Math.random().toString(36).substr(2, 9),
+                            title: '',
+                            category: 'Action',
+                            thumbnail: 'https://picsum.photos/seed/arcade/400/225',
+                            url: '',
+                            description: '',
+                            rating: 0,
+                            plays: 0,
+                            source: 'External'
+                        };
+                    }
+                    this.admin.gameEditor.show = true;
+                },
+
+                saveGame() {
+                    const game = this.admin.gameEditor.game;
+                    if (!game.title || !game.url) {
+                        alert('Title and URL are required');
+                        return;
+                    }
+                    
+                    const index = this.games.findIndex(g => g.id === game.id);
+                    if (index !== -1) {
+                        this.games[index] = { ...game };
+                        this.addLog(`Game "${game.title}" updated`, 'info');
+                    } else {
+                        this.games.push({ ...game });
+                        this.addLog(`New game "${game.title}" added`, 'success');
+                    }
+                    
+                    this.admin.gameEditor.show = false;
+                    this.admin.gameEditor.game = null;
+                },
+
+                randomGame() {
+                    if (this.games.length === 0) return;
+                    const game = this.games[Math.floor(Math.random() * this.games.length)];
+                    this.openGame(game);
+                },
+
+                currentTime: '',
+                updateClock() {
+                    this.currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                },
+
                 async init() {
+                    // Start Clock
+                    this.updateClock();
+                    setInterval(() => this.updateClock(), 1000);
+
+                    // Anti-Blocking: Panic Key Listener
+                    window.addEventListener('keydown', (e) => {
+                        if (e.key === this.settings.panicKey) {
+                            window.location.href = this.settings.panicUrl;
+                        }
+                        // Stealth Key (Swap to New Tab) - Default key is \
+                        if (e.key === '\\') {
+                            window.open(this.settings.panicUrl, '_blank');
+                        }
+                    });
+
+                    // Anti-Blocking: Tab Cloaking
+                    this.$watch('profile.notes', (val) => {
+                        localStorage.setItem('arcade_notes', val);
+                    });
+                    this.$watch('settings.cloakMode', (val) => {
+                        localStorage.setItem('arcade_cloak', val);
+                        this.applyCloak();
+                    });
+                    this.$watch('settings.cloakPreset', (val) => {
+                        localStorage.setItem('arcade_cloak_preset', val);
+                        this.applyCloak();
+                    });
+                    this.$watch('settings.autoCloakOnBlur', (val) => {
+                        localStorage.setItem('arcade_auto_cloak_blur', val);
+                    });
+                    this.$watch('settings.blankCloak', (val) => {
+                        localStorage.setItem('arcade_blank_cloak', val);
+                    });
+                    this.$watch('settings.accentColor', (val) => {
+                        localStorage.setItem('arcade_accent_color', val);
+                        document.documentElement.style.setProperty('--accent-color', val);
+                    });
+                    this.$watch('settings.bgEffect', (val) => {
+                        localStorage.setItem('arcade_bg_effect', val);
+                    });
+                    this.$watch('settings.soundEffects', (val) => {
+                        localStorage.setItem('arcade_sounds', val);
+                    });
+                    this.applyCloak();
+                    document.documentElement.style.setProperty('--accent-color', this.settings.accentColor);
+
+                    // Auto-Cloak on Blur
+                    window.addEventListener('blur', () => {
+                        if (this.settings.autoCloakOnBlur) {
+                            this.settings.cloakMode = true;
+                        }
+                    });
+                    window.addEventListener('focus', () => {
+                        if (this.settings.autoCloakOnBlur) {
+                            // Optionally uncloak on focus, but maybe safer to keep it cloaked
+                            // this.settings.cloakMode = false;
+                        }
+                    });
+
                     // Boot Sequence Safety
                     setTimeout(() => {
                         if (this.loading) {
@@ -920,7 +1621,10 @@
                             } else {
                                 this.user = null;
                                 this.isAdmin = false;
-                                if (!this.isGuest) {
+                                // Even if not logged in, guests should see chat if rules allow
+                                if (this.isGuest) {
+                                    this.setupListeners();
+                                } else {
                                     this.modals.auth = true;
                                 }
                             }
@@ -932,6 +1636,58 @@
                         this.loading = false;
                         this.showToast("System Error: " + e.message, "alert-triangle");
                     }
+                },
+
+                applyCloak() {
+                    const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+                    link.type = 'image/x-icon';
+                    link.rel = 'shortcut icon';
+                    
+                    if (this.settings.cloakMode) {
+                        const presets = {
+                            classroom: { title: "Google Classroom", icon: "https://ssl.gstatic.com/classroom/favicon.png" },
+                            canvas: { title: "Dashboard | Canvas", icon: "https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e108ee57b6.ico" },
+                            drive: { title: "My Drive - Google Drive", icon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
+                            grades: { title: "Grades & Attendance", icon: "https://ssl.gstatic.com/classroom/favicon.png" }
+                        };
+                        const p = presets[this.settings.cloakPreset] || presets.classroom;
+                        document.title = p.title;
+                        link.href = p.icon;
+                    } else {
+                        document.title = "GOLDBAR | DASHBOARD";
+                        link.href = "/favicon.ico";
+                    }
+                    
+                    if (!document.querySelector("link[rel*='icon']")) {
+                        document.getElementsByTagName('head')[0].appendChild(link);
+                    }
+                },
+
+                toggleBlankCloak() {
+                    const current = localStorage.getItem('arcade_blank_cloak') === 'true';
+                    localStorage.setItem('arcade_blank_cloak', !current);
+                    this.$nextTick(() => this.$dispatch('refresh'));
+                },
+
+                handleFirestoreError(error, operationType, path) {
+                    const errInfo = {
+                        error: error instanceof Error ? error.message : String(error),
+                        authInfo: {
+                            userId: this.auth?.currentUser?.uid,
+                            email: this.auth?.currentUser?.email,
+                            emailVerified: this.auth?.currentUser?.emailVerified,
+                            isAnonymous: this.auth?.currentUser?.isAnonymous,
+                            providerInfo: this.auth?.currentUser?.providerData.map(p => ({
+                                providerId: p.providerId,
+                                email: p.email
+                            })) || []
+                        },
+                        operationType,
+                        path
+                    };
+                    console.error('Firestore Error:', JSON.stringify(errInfo));
+                    this.showToast("Database Error: " + (error.message || "Access Denied"), "alert-triangle");
+                    throw new Error(JSON.stringify(errInfo));
                 },
 
                 async login() {
@@ -968,35 +1724,42 @@
                 },
 
                 async syncProfile(user) {
-                    const userRef = window.GoldBarFirestore.doc(this.db, 'users', user.uid);
-                    const userSnap = await window.GoldBarFirestore.getDoc(userRef);
+                    const path = `users/${user.uid}`;
+                    try {
+                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', user.uid);
+                        const userSnap = await window.GoldBarFirestore.getDoc(userRef);
 
-                    if (userSnap.exists()) {
-                        this.profile = { ...this.profile, ...userSnap.data() };
-                    } else {
-                        const newProfile = {
-                            uid: user.uid,
-                            name: user.displayName || 'New_Unit',
-                            avatar: user.photoURL || this.avatars[0],
-                            role: this.isAdmin ? 'admin' : 'user',
-                            level: 1,
-                            achievements: ['first_login'],
-                            recentlyPlayed: [],
-                            favorites: [],
-                            gameControls: {}
-                        };
-                        await window.GoldBarFirestore.setDoc(userRef, newProfile);
-                        this.profile = newProfile;
-                        this.showToast('System Boot', 'power');
+                        if (userSnap.exists()) {
+                            this.profile = { ...this.profile, ...userSnap.data() };
+                        } else {
+                            const newProfile = {
+                                uid: user.uid,
+                                name: user.displayName || 'New_Unit',
+                                avatar: user.photoURL || this.avatars[0],
+                                role: this.isAdmin ? 'admin' : 'user',
+                                level: 1,
+                                achievements: ['first_login'],
+                                recentlyPlayed: [],
+                                favorites: [],
+                                gameControls: {}
+                            };
+                            await window.GoldBarFirestore.setDoc(userRef, newProfile);
+                            this.profile = newProfile;
+                            this.showToast('System Boot', 'power');
+                        }
+                    } catch (e) {
+                        this.handleFirestoreError(e, 'write', path);
                     }
                 },
 
                 setupListeners() {
-                    if (this.listenersActive) return;
+                    if (this.listenersActive || !this.db) return;
                     this.listenersActive = true;
+                    
                     // Chat Messages
+                    const messagesPath = 'messages';
                     const qMessages = window.GoldBarFirestore.query(
-                        window.GoldBarFirestore.collection(this.db, 'messages'),
+                        window.GoldBarFirestore.collection(this.db, messagesPath),
                         window.GoldBarFirestore.orderBy('timestamp', 'asc')
                     );
                     window.GoldBarFirestore.onSnapshot(qMessages, (snapshot) => {
@@ -1004,10 +1767,13 @@
                         this.messages = all.filter(m => m.type === 'chat');
                         this.gameRequests = all.filter(m => m.type === 'request');
                         this.scrollToBottom();
+                    }, (error) => {
+                        this.handleFirestoreError(error, 'get', messagesPath);
                     });
 
                     // Ratings
-                    window.GoldBarFirestore.onSnapshot(window.GoldBarFirestore.collection(this.db, 'ratings'), (snapshot) => {
+                    const ratingsPath = 'ratings';
+                    window.GoldBarFirestore.onSnapshot(window.GoldBarFirestore.collection(this.db, ratingsPath), (snapshot) => {
                         const ratings = {};
                         snapshot.docs.forEach(doc => {
                             const data = doc.data();
@@ -1015,6 +1781,8 @@
                             ratings[data.gameId].push({ id: doc.id, ...data });
                         });
                         this.gameRatings = ratings;
+                    }, (error) => {
+                        this.handleFirestoreError(error, 'get', ratingsPath);
                     });
                 },
 
@@ -1038,8 +1806,34 @@
                     return filtered;
                 },
 
+                calculate() {
+                    try {
+                        // Basic math only for safety
+                        const sanitized = this.calcInput.replace(/[^0-9+\-*/().]/g, '');
+                        this.calcResult = eval(sanitized);
+                    } catch (e) {
+                        this.calcResult = 'Error';
+                    }
+                },
+
+                getGreeting() {
+                    const hour = new Date().getHours();
+                    if (hour < 12) return 'Good Morning';
+                    if (hour < 18) return 'Good Afternoon';
+                    return 'Good Evening';
+                },
+
                 getGameById(id) {
                     return this.games.find(g => g.id === id);
+                },
+
+                reloadGame() {
+                    if (!this.selectedGame) return;
+                    const url = this.selectedGame.url;
+                    this.selectedGame.url = '';
+                    this.$nextTick(() => {
+                        this.selectedGame.url = url;
+                    });
                 },
 
                 isFavorite(id) {
@@ -1048,25 +1842,35 @@
 
                 async toggleFavorite(id) {
                     if (!this.user) return;
-                    const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
-                    let favorites = [...(this.profile.favorites || [])];
-                    if (favorites.includes(id)) {
-                        favorites = favorites.filter(fid => fid !== id);
-                    } else {
-                        favorites.push(id);
+                    const path = `users/${this.user.uid}`;
+                    try {
+                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
+                        let favorites = [...(this.profile.favorites || [])];
+                        if (favorites.includes(id)) {
+                            favorites = favorites.filter(fid => fid !== id);
+                        } else {
+                            favorites.push(id);
+                        }
+                        await window.GoldBarFirestore.updateDoc(userRef, { favorites });
+                        this.profile.favorites = favorites;
+                    } catch (e) {
+                        this.handleFirestoreError(e, 'update', path);
                     }
-                    await window.GoldBarFirestore.updateDoc(userRef, { favorites });
-                    this.profile.favorites = favorites;
                 },
 
                 async updateGameControl(gameId, key, value) {
                     if (!this.user) return;
-                    const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
-                    const controls = { ...(this.profile.gameControls || {}) };
-                    if (!controls[gameId]) controls[gameId] = { 'Move': 'WASD', 'Action': 'SPACE' };
-                    controls[gameId][key] = value;
-                    await window.GoldBarFirestore.updateDoc(userRef, { gameControls: controls });
-                    this.profile.gameControls = controls;
+                    const path = `users/${this.user.uid}`;
+                    try {
+                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
+                        const controls = { ...(this.profile.gameControls || {}) };
+                        if (!controls[gameId]) controls[gameId] = { 'Move': 'WASD', 'Action': 'SPACE' };
+                        controls[gameId][key] = value;
+                        await window.GoldBarFirestore.updateDoc(userRef, { gameControls: controls });
+                        this.profile.gameControls = controls;
+                    } catch (e) {
+                        this.handleFirestoreError(e, 'update', path);
+                    }
                 },
 
                 addControlMapping(gameId) {
@@ -1078,8 +1882,9 @@
 
                 async sendMessage() {
                     if (!this.newMessage.trim() || !this.user) return;
+                    const path = 'messages';
                     try {
-                        await window.GoldBarFirestore.addDoc(window.GoldBarFirestore.collection(this.db, 'messages'), {
+                        await window.GoldBarFirestore.addDoc(window.GoldBarFirestore.collection(this.db, path), {
                             userId: this.user.uid,
                             userName: this.profile.name,
                             text: this.newMessage,
@@ -1089,28 +1894,43 @@
                         this.newMessage = '';
                         this.unlockAchievement('chat_active');
                     } catch (e) {
-                        console.error("Chat error:", e);
+                        this.handleFirestoreError(e, 'create', path);
                     }
+                },
+
+                replyToMessage(userName) {
+                    this.newMessage = `@${userName} ${this.newMessage}`;
+                    this.$refs.chatInput.focus();
                 },
 
                 async saveProfile() {
                     if (!this.user) return;
-                    const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
-                    await window.GoldBarFirestore.updateDoc(userRef, {
-                        name: this.profile.name,
-                        avatar: this.profile.avatar
-                    });
-                    this.modals.profile = false;
+                    const path = `users/${this.user.uid}`;
+                    try {
+                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
+                        await window.GoldBarFirestore.updateDoc(userRef, {
+                            name: this.profile.name,
+                            avatar: this.profile.avatar
+                        });
+                        this.modals.profile = false;
+                    } catch (e) {
+                        this.handleFirestoreError(e, 'update', path);
+                    }
                 },
 
                 async unlockAchievement(id) {
                     if (!this.user || this.hasAchievement(id)) return;
-                    const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
-                    const newAchievements = [...this.profile.achievements, id];
-                    await window.GoldBarFirestore.updateDoc(userRef, { achievements: newAchievements });
-                    this.profile.achievements = newAchievements;
-                    const ach = this.allAchievements.find(a => a.id === id);
-                    if (ach) this.showToast(ach.name, ach.icon);
+                    const path = `users/${this.user.uid}`;
+                    try {
+                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
+                        const newAchievements = [...this.profile.achievements, id];
+                        await window.GoldBarFirestore.updateDoc(userRef, { achievements: newAchievements });
+                        this.profile.achievements = newAchievements;
+                        const ach = this.allAchievements.find(a => a.id === id);
+                        if (ach) this.showToast(ach.name, ach.icon);
+                    } catch (e) {
+                        this.handleFirestoreError(e, 'update', path);
+                    }
                 },
 
                 hasAchievement(id) {
@@ -1123,24 +1943,75 @@
                 },
 
                 async openGame(game) {
+                    this.playSound('click');
+                    // Anti-Blocking: About:Blank Cloaking
+                    if (this.settings.blankCloak) {
+                        const win = window.open('about:blank', '_blank');
+                        if (win) {
+                            win.document.body.style.margin = '0';
+                            win.document.body.style.height = '100vh';
+                            const iframe = win.document.createElement('iframe');
+                            iframe.style.border = 'none';
+                            iframe.style.width = '100%';
+                            iframe.style.height = '100%';
+                            iframe.src = game.url;
+                            win.document.body.appendChild(iframe);
+                            
+                            // Set title and favicon in the new tab if cloaking is on
+                            if (this.settings.cloakMode) {
+                                win.document.title = this.settings.cloakPreset === 'classroom' ? 'Classes' : 
+                                           this.settings.cloakPreset === 'canvas' ? 'Dashboard' : 
+                                           this.settings.cloakPreset === 'drive' ? 'My Drive - Google Drive' : 'Grades';
+                                
+                                const link = win.document.createElement('link');
+                                link.rel = 'icon';
+                                link.href = this.settings.cloakPreset === 'classroom' ? 'https://ssl.gstatic.com/classroom/favicon.png' :
+                                           this.settings.cloakPreset === 'canvas' ? 'https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico' :
+                                           'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
+                                win.document.head.appendChild(link);
+                            } else {
+                                win.document.title = game.title;
+                            }
+                            return;
+                        }
+                    }
+
                     this.selectedGame = game;
                     this.unlockAchievement('first_game');
                     if (this.user) {
-                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
-                        const recentlyPlayed = [...(this.profile.recentlyPlayed || [])];
-                        const filtered = recentlyPlayed.filter(id => id !== game.id);
-                        const newList = [game.id, ...filtered].slice(0, 10);
-                        await window.GoldBarFirestore.updateDoc(userRef, { recentlyPlayed: newList });
-                        this.profile.recentlyPlayed = newList;
+                        const path = `users/${this.user.uid}`;
+                        try {
+                            const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
+                            const recentlyPlayed = [...(this.profile.recentlyPlayed || [])];
+                            const filtered = recentlyPlayed.filter(id => id !== game.id);
+                            const newList = [game.id, ...filtered].slice(0, 10);
+                            await window.GoldBarFirestore.updateDoc(userRef, { recentlyPlayed: newList });
+                            this.profile.recentlyPlayed = newList;
+                        } catch (e) {
+                            this.handleFirestoreError(e, 'update', path);
+                        }
                     }
                     document.body.style.overflow = 'hidden';
                     this.$nextTick(() => lucide.createIcons());
                 },
 
                 closeGame() {
+                    this.playSound('click');
                     this.selectedGame = null;
                     this.showGameControls = false;
                     document.body.style.overflow = '';
+                },
+
+                playSound(type) {
+                    if (!this.settings.soundEffects) return;
+                    const sounds = {
+                        click: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
+                        hover: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
+                        success: 'https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3'
+                    };
+                    const audio = new Audio(sounds[type]);
+                    audio.volume = (this.settings.volume / 100) * 0.2;
+                    audio.play().catch(() => {});
                 },
 
                 openReviews(game) {
@@ -1151,33 +2022,43 @@
 
                 async submitRating() {
                     if (!this.newReview.trim() || !this.reviewGame || !this.user) return;
-                    await window.GoldBarFirestore.addDoc(window.GoldBarFirestore.collection(this.db, 'ratings'), {
-                        gameId: this.reviewGame.id,
-                        userId: this.user.uid,
-                        userName: this.profile.name,
-                        rating: this.newRating,
-                        review: this.newReview,
-                        timestamp: window.GoldBarFirestore.serverTimestamp(),
-                        replies: []
-                    });
-                    this.newReview = '';
-                    this.unlockAchievement('first_review');
-                    this.modals.reviews = false;
+                    const path = 'ratings';
+                    try {
+                        await window.GoldBarFirestore.addDoc(window.GoldBarFirestore.collection(this.db, path), {
+                            gameId: this.reviewGame.id,
+                            userId: this.user.uid,
+                            userName: this.profile.name,
+                            rating: this.newRating,
+                            review: this.newReview,
+                            timestamp: window.GoldBarFirestore.serverTimestamp(),
+                            replies: []
+                        });
+                        this.newReview = '';
+                        this.unlockAchievement('first_review');
+                        this.modals.reviews = false;
+                    } catch (e) {
+                        this.handleFirestoreError(e, 'create', path);
+                    }
                 },
 
                 async replyToReview(review) {
                     if (!this.user) return;
                     const text = prompt(`Reply to ${review.userName}:`);
                     if (text && text.trim()) {
-                        const ratingRef = window.GoldBarFirestore.doc(this.db, 'ratings', review.id);
-                        const replies = [...(review.replies || [])];
-                        replies.push({
-                            userId: this.user.uid,
-                            userName: this.profile.name,
-                            text: text.trim(),
-                            timestamp: new Date().toISOString()
-                        });
-                        await window.GoldBarFirestore.updateDoc(ratingRef, { replies });
+                        const path = `ratings/${review.id}`;
+                        try {
+                            const ratingRef = window.GoldBarFirestore.doc(this.db, 'ratings', review.id);
+                            const replies = [...(review.replies || [])];
+                            replies.push({
+                                userId: this.user.uid,
+                                userName: this.profile.name,
+                                text: text.trim(),
+                                timestamp: new Date().toISOString()
+                            });
+                            await window.GoldBarFirestore.updateDoc(ratingRef, { replies });
+                        } catch (e) {
+                            this.handleFirestoreError(e, 'update', path);
+                        }
                     }
                 },
 
@@ -1197,11 +2078,29 @@
                 },
 
                 formatTime(ts) {
-                    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    if (!ts) return '';
+                    const date = ts.toDate ? ts.toDate() : new Date(ts);
+                    if (isNaN(date.getTime())) return '...';
+                    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                },
+
+                formatDateTime(ts) {
+                    if (!ts) return '';
+                    const date = ts.toDate ? ts.toDate() : new Date(ts);
+                    if (isNaN(date.getTime())) return '...';
+                    return date.toLocaleString([], { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
                 },
 
                 formatDate(ts) {
-                    return new Date(ts).toLocaleDateString();
+                    if (!ts) return '';
+                    const date = ts.toDate ? ts.toDate() : new Date(ts);
+                    if (isNaN(date.getTime())) return '...';
+                    return date.toLocaleDateString();
                 },
 
                 toggleFullscreen() {

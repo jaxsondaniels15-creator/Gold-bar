@@ -99,7 +99,7 @@ service cloud.firestore {
     }
 
     match /messages/{messageId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow create: if isAuthenticated() && isValidMessage(request.resource.data);
       allow update, delete: if isAdmin();
     }
