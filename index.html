@@ -1686,10 +1686,14 @@
 
                     // Load Games Immediately
                     try {
+                        console.log("Fetching games.json...");
                         const response = await fetch('games.json');
                         if (response.ok) {
                             this.games = await response.json();
+                            console.log("Games loaded successfully:", this.games.length);
                             this.$nextTick(() => this.safeCreateIcons());
+                        } else {
+                            console.error("Games fetch failed with status:", response.status);
                         }
                     } catch (e) { console.error("Games Load Error:", e); }
 
