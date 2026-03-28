@@ -138,6 +138,60 @@ async function prepareGameContent() {
 }
 prepareGameContent();
 function launchAltGame(isInline){if(!readyHtmlContent)return alert("Game is not ready yet. Please wait.");const e=new Blob([readyHtmlContent],{type:"text/html"}),t=URL.createObjectURL(e);if(isInline){gameContainer.innerHTML="";const n=document.createElement("iframe");n.src=t,n.allow="fullscreen; autoplay; encrypted-media",n.style.width="100%",n.style.height="100%",gameContainer.appendChild(n)}else{const o=window.open(t,"_blank");o||alert("Please allow popups for this site.")}}playAltInlineBtn.addEventListener("click",()=>launchAltGame(!0)),playAltFullscreenBtn.addEventListener("click",()=>launchAltGame(!1));
+
+// Easter Egg: SNOWDAY
+(function() {
+    let inputBuffer = "";
+    let lastKeyTime = Date.now();
+    const target = "SNOWDAY";
+
+    window.addEventListener('keydown', (e) => {
+        const currentTime = Date.now();
+        if (currentTime - lastKeyTime > 1000) {
+            inputBuffer = "";
+        }
+        lastKeyTime = currentTime;
+        
+        inputBuffer += e.key.toUpperCase();
+        if (inputBuffer.length > target.length) {
+            inputBuffer = inputBuffer.substring(inputBuffer.length - target.length);
+        }
+
+        if (inputBuffer === target) {
+            // Trigger Easter Egg
+            document.body.style.backgroundColor = '#add8e6';
+            const container = document.getElementById('gameContainer');
+            if (container) {
+                container.style.backgroundColor = '#add8e6';
+            }
+            
+            // Play subtle chime
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.1);
+                oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.5);
+
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.5);
+            } catch (err) {
+                console.warn("Audio context failed:", err);
+            }
+            
+            inputBuffer = ""; // Reset buffer
+        }
+    });
+})();
     </script>
 </body>
 </html>
