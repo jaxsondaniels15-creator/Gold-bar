@@ -1686,16 +1686,37 @@
 
                     // Load Games Immediately
                     try {
-                        console.log("Fetching games.json...");
-                        const response = await fetch('games.json');
+                        console.log("Fetching /games.json...");
+                        const response = await fetch('/games.json');
                         if (response.ok) {
                             this.games = await response.json();
                             console.log("Games loaded successfully:", this.games.length);
                             this.$nextTick(() => this.safeCreateIcons());
                         } else {
                             console.error("Games fetch failed with status:", response.status);
+                            // Fallback to local games.json if root fetch fails (some environments might differ)
+                            const fallbackResponse = await fetch('games.json');
+                            if (fallbackResponse.ok) {
+                                this.games = await fallbackResponse.json();
+                                console.log("Games loaded via fallback path.");
+                                this.$nextTick(() => this.safeCreateIcons());
+                            }
                         }
-                    } catch (e) { console.error("Games Load Error:", e); }
+                    } catch (e) { 
+                        console.error("Games Load Error:", e);
+                        // Final attempt with full URL if relative fails
+                        try {
+                            const fullUrl = window.location.origin + '/games.json';
+                            const finalResponse = await fetch(fullUrl);
+                            if (finalResponse.ok) {
+                                this.games = await finalResponse.json();
+                                console.log("Games loaded via full URL.");
+                                this.$nextTick(() => this.safeCreateIcons());
+                            }
+                        } catch (finalErr) {
+                            console.error("Final Games Load Attempt Failed:", finalErr);
+                        }
+                    }
 
                     try {
                         // Wait for Firebase to be ready

@@ -11,6 +11,9 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // Serve static files from public directory
+  app.use(express.static('public'));
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
