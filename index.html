@@ -351,10 +351,11 @@
                             x-ref="chatInput"
                             type="text" 
                             x-model="newMessage" 
-                            :placeholder="chatTab === 'ai' ? 'Ask AI anything...' : (chatTab === 'global' ? 'Type a message...' : 'Request a game...')"
-                            class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-4 pr-10 text-xs focus:outline-none focus:border-amber-500/50 transition-all"
+                            :placeholder="chatTab === 'ai' ? 'Ask AI anything...' : (isAdmin ? 'Type a message...' : 'Chat restricted to admin')"
+                            :disabled="chatTab !== 'ai' && !isAdmin"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-4 pr-10 text-xs focus:outline-none focus:border-amber-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                        <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:text-amber-400 transition-colors">
+                        <button type="submit" :disabled="chatTab !== 'ai' && !isAdmin" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:text-amber-400 transition-colors disabled:opacity-50">
                             <i data-lucide="send" class="w-4 h-4"></i>
                         </button>
                     </form>
@@ -439,7 +440,7 @@
 
             <!-- Category Pills -->
             <div class="px-6 py-3 border-b border-white/5 bg-black/20 flex items-center gap-2 overflow-x-auto custom-scrollbar">
-                <template x-for="tab in ['all', 'action', 'puzzle', 'sports', 'retro', 'strategy']">
+                <template x-for="tab in ['all', 'action', 'puzzle', 'sports', 'retro', 'strategy', 'youtube']">
                     <button 
                         @click="activeTab = tab"
                         class="px-4 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest transition-all border whitespace-nowrap"
@@ -618,59 +619,110 @@
                     </template>
                 </div>
 
-                <!-- Game Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-                    <template x-for="game in filteredGames" :key="game.id">
-                        <div 
-                            class="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/10"
-                        >
-                            <!-- Thumbnail -->
-                            <div class="aspect-video relative overflow-hidden">
-                                <img :src="game.thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                
-                                <!-- Favorite Toggle -->
-                                <button 
-                                    @click.stop="toggleFavorite(game.id)"
-                                    class="absolute top-3 left-3 p-2 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all"
-                                >
-                                    <i data-lucide="heart" class="w-3 h-3" :class="isFavorite(game.id) ? 'text-pink-500 fill-pink-500' : 'text-white/40'"></i>
-                                </button>
-
-                                <!-- Rating Overlay -->
-                                <div class="absolute top-3 right-3 flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10">
-                                    <i data-lucide="star" class="w-3 h-3 text-amber-400 fill-amber-400"></i>
-                                    <span class="text-[10px] font-bold" x-text="getAverageRating(game.id)"></span>
+                <!-- YouTube Section -->
+                <template x-if="activeTab === 'youtube'">
+                    <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div class="bg-zinc-900/50 border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
+                            <div class="max-w-4xl mx-auto space-y-8">
+                                <div class="text-center space-y-2">
+                                    <h2 class="text-3xl font-black italic tracking-tighter">TUBE<span class="text-amber-400">_BYPASS</span></h2>
+                                    <p class="text-[10px] font-mono text-white/40 uppercase tracking-widest">Secure_Viewing_Environment // No_Tracking // No_Ads</p>
                                 </div>
-                            </div>
 
-                            <!-- Info -->
-                            <div class="p-5">
-                                <div class="flex items-start justify-between mb-2">
-                                    <h3 class="font-bold text-sm" x-text="game.title"></h3>
-                                    <span class="text-[9px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded uppercase" x-text="game.source"></span>
-                                </div>
-                                <p class="text-xs text-white/40 line-clamp-2 mb-6 leading-relaxed" x-text="game.description"></p>
-                                
-                                <div class="flex items-center gap-2">
-                                    <button 
-                                        @click="openGame(game)"
-                                        class="flex-1 bg-white text-black py-2.5 rounded-xl text-xs font-bold hover:bg-amber-400 transition-colors flex items-center justify-center gap-2"
+                                <div class="relative group">
+                                    <input 
+                                        type="text" 
+                                        x-model="youtubeUrl" 
+                                        @keyup.enter="loadYoutube()"
+                                        placeholder="PASTE_YOUTUBE_URL_OR_ID_HERE..." 
+                                        class="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-sm font-mono focus:outline-none focus:border-amber-500/50 transition-all pr-32"
                                     >
-                                        <i data-lucide="play" class="w-3 h-3 fill-current"></i>
-                                        LAUNCH
-                                    </button>
                                     <button 
-                                        @click="openReviews(game)"
-                                        class="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
+                                        @click="loadYoutube()"
+                                        class="absolute right-2 top-1/2 -translate-y-1/2 bg-amber-500 text-black px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-400 transition-all"
                                     >
-                                        <i data-lucide="message-square" class="w-4 h-4 text-white/40"></i>
+                                        Load_Feed
                                     </button>
                                 </div>
+
+                                <template x-if="youtubeId">
+                                    <div class="aspect-video w-full bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                                        <iframe 
+                                            :src="'https://www.youtube.com/embed/' + youtubeId + '?autoplay=1&rel=0'" 
+                                            class="w-full h-full" 
+                                            frameborder="0" 
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                            allowfullscreen
+                                        ></iframe>
+                                    </div>
+                                </template>
+
+                                <template x-if="!youtubeId">
+                                    <div class="aspect-video w-full bg-black/20 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-white/20 space-y-4">
+                                        <i data-lucide="play-circle" class="w-12 h-12"></i>
+                                        <p class="text-[10px] font-mono uppercase tracking-widest">Awaiting_Signal_Input...</p>
+                                    </div>
+                                </template>
                             </div>
                         </div>
-                    </template>
-                </div>
+                    </div>
+                </template>
+
+                <!-- Game Grid -->
+                <template x-if="activeTab !== 'youtube'">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                        <template x-for="game in filteredGames" :key="game.id">
+                            <div 
+                                class="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/10"
+                            >
+                                <!-- Thumbnail -->
+                                <div class="aspect-video relative overflow-hidden">
+                                    <img :src="game.thumbnail" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                    
+                                    <!-- Favorite Toggle -->
+                                    <button 
+                                        @click.stop="toggleFavorite(game.id)"
+                                        class="absolute top-3 left-3 p-2 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-all"
+                                    >
+                                        <i data-lucide="heart" class="w-3 h-3" :class="isFavorite(game.id) ? 'text-pink-500 fill-pink-500' : 'text-white/40'"></i>
+                                    </button>
+
+                                    <!-- Rating Overlay -->
+                                    <div class="absolute top-3 right-3 flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10">
+                                        <i data-lucide="star" class="w-3 h-3 text-amber-400 fill-amber-400"></i>
+                                        <span class="text-[10px] font-bold" x-text="getAverageRating(game.id)"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Info -->
+                                <div class="p-5">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <h3 class="font-bold text-sm" x-text="game.title"></h3>
+                                        <span class="text-[9px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded uppercase" x-text="game.source"></span>
+                                    </div>
+                                    <p class="text-xs text-white/40 line-clamp-2 mb-6 leading-relaxed" x-text="game.description"></p>
+                                    
+                                    <div class="flex items-center gap-2">
+                                        <button 
+                                            @click="openGame(game)"
+                                            class="flex-1 bg-white text-black py-2.5 rounded-xl text-xs font-bold hover:bg-amber-400 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <i data-lucide="play" class="w-3 h-3 fill-current"></i>
+                                            LAUNCH
+                                        </button>
+                                        <button 
+                                            @click="openReviews(game)"
+                                            class="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
+                                        >
+                                            <i data-lucide="message-square" class="w-4 h-4 text-white/40"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
             </div>
         </main>
     </div>
@@ -1633,6 +1685,26 @@
 
                 calcInput: '',
                 calcResult: '',
+                youtubeUrl: '',
+                youtubeId: '',
+                loadYoutube() {
+                    const url = this.youtubeUrl.trim();
+                    if (!url) return;
+                    
+                    let id = '';
+                    if (url.includes('v=')) {
+                        id = url.split('v=')[1].split('&')[0];
+                    } else if (url.includes('youtu.be/')) {
+                        id = url.split('youtu.be/')[1].split('?')[0];
+                    } else if (url.includes('embed/')) {
+                        id = url.split('embed/')[1].split('?')[0];
+                    } else {
+                        id = url;
+                    }
+                    
+                    this.youtubeId = id;
+                    this.addLog(`Loaded YouTube signal: ${id}`, 'info');
+                },
                 studyTimer: {
                     time: 1500,
                     isRunning: false,
@@ -2025,7 +2097,19 @@
                         const authInstance = window.GoldBarAuth.auth;
                         const provider = window.GoldBarAuth.googleProvider;
                         console.log("Attempting signInWithPopup...");
-                        await window.GoldBarAuth.signInWithPopup(authInstance, provider);
+                        const result = await window.GoldBarAuth.signInWithPopup(authInstance, provider);
+                        const user = result.user;
+
+                        // Restriction check
+                        if (user.email !== 'jaxsondaniels15@gmail.com') {
+                            await window.GoldBarAuth.signOut(authInstance);
+                            this.showToast("Access Restricted: Only authorized personnel can access the vault.", "shield-off");
+                            this.user = null;
+                            this.isAdmin = false;
+                            this.isGuest = false;
+                            return;
+                        }
+
                         console.log("Login successful");
                         this.isGuest = false;
                         this.modals.auth = false;
