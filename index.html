@@ -1151,8 +1151,37 @@
                                 <option value="canvas" class="bg-zinc-900">Canvas Dashboard</option>
                                 <option value="drive" class="bg-zinc-900">Google Drive</option>
                                 <option value="grades" class="bg-zinc-900">Grades & Attendance</option>
+                                <option value="custom" class="bg-zinc-900">Custom</option>
                             </select>
                         </div>
+
+                        <template x-if="settings.cloakPreset === 'custom'">
+                            <div class="space-y-2 animate-in fade-in slide-in-from-top-1">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="space-y-1">
+                                        <label class="text-[8px] text-white/40 uppercase">Custom Title</label>
+                                        <input 
+                                            type="text" 
+                                            x-model="settings.customCloakTitle"
+                                            @input="localStorage.setItem('arcade_custom_cloak_title', settings.customCloakTitle)"
+                                            class="w-full bg-white/5 border border-white/10 rounded-lg py-1.5 px-3 text-[10px] focus:outline-none focus:border-amber-500/50"
+                                            placeholder="e.g. My Notes"
+                                        >
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-[8px] text-white/40 uppercase">Icon URL</label>
+                                        <input 
+                                            type="text" 
+                                            x-model="settings.customCloakIcon"
+                                            @input="localStorage.setItem('arcade_custom_cloak_icon', settings.customCloakIcon)"
+                                            class="w-full bg-white/5 border border-white/10 rounded-lg py-1.5 px-3 text-[10px] focus:outline-none focus:border-amber-500/50"
+                                            placeholder="https://..."
+                                        >
+                                    </div>
+                                </div>
+                                <p class="text-[8px] text-white/20 italic">Tip: Use a direct link to an image for the icon.</p>
+                            </div>
+                        </template>
 
                         <div class="flex items-center justify-between">
                             <div>
@@ -1656,6 +1685,8 @@
                     theaterMode: false,
                     panicKey: localStorage.getItem('arcade_panic_key') || ']',
                     panicUrl: localStorage.getItem('arcade_panic_url') || 'https://classroom.google.com',
+                    customCloakTitle: localStorage.getItem('arcade_custom_cloak_title') || '',
+                    customCloakIcon: localStorage.getItem('arcade_custom_cloak_icon') || '',
                     accentColor: localStorage.getItem('arcade_accent_color') || '#fbbf24', // Default amber-400
                     bgEffect: localStorage.getItem('arcade_bg_effect') || 'none',
                     soundEffects: localStorage.getItem('arcade_sounds') !== 'false'
@@ -1857,6 +1888,16 @@
                         this.applyCloak();
                         this.syncToFirestore({ 'settings.cloakPreset': val });
                     });
+                    this.$watch('settings.customCloakTitle', (val) => {
+                        localStorage.setItem('arcade_custom_cloak_title', val);
+                        if (this.settings.cloakPreset === 'custom') this.applyCloak();
+                        this.syncToFirestore({ 'settings.customCloakTitle': val });
+                    });
+                    this.$watch('settings.customCloakIcon', (val) => {
+                        localStorage.setItem('arcade_custom_cloak_icon', val);
+                        if (this.settings.cloakPreset === 'custom') this.applyCloak();
+                        this.syncToFirestore({ 'settings.customCloakIcon': val });
+                    });
                     this.$watch('settings.autoCloakOnBlur', (val) => {
                         localStorage.setItem('arcade_auto_cloak_blur', val);
                         this.syncToFirestore({ 'settings.autoCloakOnBlur': val });
@@ -2033,15 +2074,20 @@
                     link.rel = 'shortcut icon';
                     
                     if (this.settings.cloakMode) {
-                        const presets = {
-                            classroom: { title: "Google Classroom", icon: "https://ssl.gstatic.com/classroom/favicon.png" },
-                            canvas: { title: "Dashboard | Canvas", icon: "https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e108ee57b6.ico" },
-                            drive: { title: "My Drive - Google Drive", icon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
-                            grades: { title: "Grades & Attendance", icon: "https://ssl.gstatic.com/classroom/favicon.png" }
-                        };
-                        const p = presets[this.settings.cloakPreset] || presets.classroom;
-                        document.title = p.title;
-                        link.href = p.icon;
+                        if (this.settings.cloakPreset === 'custom') {
+                            document.title = this.settings.customCloakTitle || 'New Tab';
+                            link.href = this.settings.customCloakIcon || 'https://ssl.gstatic.com/classroom/favicon.png';
+                        } else {
+                            const presets = {
+                                classroom: { title: "Google Classroom", icon: "https://ssl.gstatic.com/classroom/favicon.png" },
+                                canvas: { title: "Dashboard | Canvas", icon: "https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e108ee57b6.ico" },
+                                drive: { title: "My Drive - Google Drive", icon: "https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png" },
+                                grades: { title: "Grades & Attendance", icon: "https://ssl.gstatic.com/classroom/favicon.png" }
+                            };
+                            const p = presets[this.settings.cloakPreset] || presets.classroom;
+                            document.title = p.title;
+                            link.href = p.icon;
+                        }
                     } else {
                         document.title = "GOLDBAR | DASHBOARD";
                         link.href = "/favicon.ico";
@@ -2449,16 +2495,26 @@
                             win.document.body.appendChild(iframe);
                             
                             if (this.settings.cloakMode) {
-                                win.document.title = this.settings.cloakPreset === 'classroom' ? 'Classes' : 
-                                           this.settings.cloakPreset === 'canvas' ? 'Dashboard' : 
-                                           this.settings.cloakPreset === 'drive' ? 'My Drive - Google Drive' : 'Grades';
-                                
-                                const link = win.document.createElement('link');
-                                link.rel = 'icon';
-                                link.href = this.settings.cloakPreset === 'classroom' ? 'https://ssl.gstatic.com/classroom/favicon.png' :
-                                           this.settings.cloakPreset === 'canvas' ? 'https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico' :
-                                           'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
-                                win.document.head.appendChild(link);
+                                if (this.settings.cloakPreset === 'custom') {
+                                    win.document.title = this.settings.customCloakTitle || 'New Tab';
+                                    if (this.settings.customCloakIcon) {
+                                        const link = win.document.createElement('link');
+                                        link.rel = 'icon';
+                                        link.href = this.settings.customCloakIcon;
+                                        win.document.head.appendChild(link);
+                                    }
+                                } else {
+                                    win.document.title = this.settings.cloakPreset === 'classroom' ? 'Classes' : 
+                                               this.settings.cloakPreset === 'canvas' ? 'Dashboard' : 
+                                               this.settings.cloakPreset === 'drive' ? 'My Drive - Google Drive' : 'Grades';
+                                    
+                                    const link = win.document.createElement('link');
+                                    link.rel = 'icon';
+                                    link.href = this.settings.cloakPreset === 'classroom' ? 'https://ssl.gstatic.com/classroom/favicon.png' :
+                                               this.settings.cloakPreset === 'canvas' ? 'https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico' :
+                                               'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
+                                    win.document.head.appendChild(link);
+                                }
                             } else {
                                 win.document.title = game.title;
                             }
