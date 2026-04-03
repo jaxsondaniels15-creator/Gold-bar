@@ -83,7 +83,7 @@ service cloud.firestore {
 
     function isValidMessage(data) {
       return data.keys().hasAll(['userId', 'userName', 'text', 'type', 'timestamp']) &&
-             data.userId == request.auth.uid &&
+             (isAuthenticated() ? data.userId == request.auth.uid : data.userId == 'guest') &&
              data.userName is string && data.userName.size() > 0 &&
              data.text is string && data.text.size() > 0 && data.text.size() <= 500 &&
              data.type in ['chat', 'request'] &&
@@ -92,7 +92,7 @@ service cloud.firestore {
 
     function isValidRating(data) {
       return data.keys().hasAll(['gameId', 'userId', 'userName', 'rating', 'timestamp']) &&
-             data.userId == request.auth.uid &&
+             (isAuthenticated() ? data.userId == request.auth.uid : data.userId == 'guest') &&
              data.rating is number && data.rating >= 1 && data.rating <= 5 &&
              (!('review' in data) || (data.review is string && data.review.size() <= 1000)) &&
              data.timestamp == request.time;
@@ -111,14 +111,16 @@ service cloud.firestore {
 
     match /messages/{messageId} {
       allow read: if true;
-      allow create: if isAuthenticated() && isValidMessage(request.resource.data);
+      allow create: if isValidMessage(request.resource.data);
       allow update, delete: if isAdmin();
     }
 
     match /ratings/{ratingId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidRating(request.resource.data);
-      allow update: if (isOwner(resource.data.userId) && isValidRating(request.resource.data)) || isAdmin();
+      allow read: if true;
+      allow create: if isValidRating(request.resource.data);
+      allow update: if (isAuthenticated() && isOwner(resource.data.userId) && isValidRating(request.resource.data)) || 
+                       isAdmin() || 
+                       (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['replies']));
       allow delete: if isAdmin();
     }
   }
