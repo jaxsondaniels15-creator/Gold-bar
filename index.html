@@ -397,6 +397,12 @@
                         <span class="text-[9px] font-bold uppercase tracking-widest">Random_Unit</span>
                     </button>
 
+                    <!-- Auto Clicker -->
+                    <button @click="autoClicker.showUI = !autoClicker.showUI" :class="autoClicker.showUI ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-white/5 text-white/40 border-white/10'" class="hidden md:flex items-center gap-2 px-4 py-1.5 border rounded-xl hover:bg-white/10 transition-all group">
+                        <i data-lucide="mouse-pointer-click" class="w-3 h-3 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-[9px] font-bold uppercase tracking-widest">Auto_Clicker</span>
+                    </button>
+
                     <!-- Panic Key Indicator -->
                     <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
                         <span class="text-[9px] font-mono uppercase tracking-widest">Panic:</span>
@@ -1482,6 +1488,72 @@
         </div>
     </div>
 
+    <!-- Floating Auto Clicker UI -->
+    <div 
+        x-show="autoClicker.showUI" 
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        class="fixed z-[100] w-64 glass border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+        :style="{ left: autoClicker.pos.x + 'px', top: autoClicker.pos.y + 'px' }"
+        @mousedown="startDrag($event)"
+    >
+        <!-- Header -->
+        <div class="bg-white/5 p-3 flex items-center justify-between cursor-move border-b border-white/5">
+            <div class="flex items-center gap-2">
+                <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i>
+                <span class="text-[10px] font-black italic uppercase tracking-widest text-white/60">GOLDBAR_CLICKER_v1.0</span>
+            </div>
+            <button @click="autoClicker.showUI = false" class="p-1 hover:bg-red-500/20 rounded-lg transition-colors group">
+                <i data-lucide="x" class="w-3 h-3 text-white/20 group-hover:text-red-500"></i>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-4 space-y-4">
+            <!-- CPS Slider -->
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[9px] font-mono text-white/40 uppercase tracking-widest">Clicks_Per_Second</span>
+                    <span class="text-xs font-black text-amber-400" x-text="autoClicker.cps"></span>
+                </div>
+                <input 
+                    type="range" 
+                    min="1" 
+                    max="50" 
+                    x-model="autoClicker.cps" 
+                    @change="if(autoClicker.enabled) { autoClicker.stop(); autoClicker.start(); }"
+                    class="w-full h-1.5 bg-white/5 rounded-full appearance-none cursor-pointer accent-amber-500"
+                >
+            </div>
+
+            <!-- Status & Controls -->
+            <div class="flex items-center gap-3">
+                <button 
+                    @click="autoClicker.toggle()" 
+                    :class="autoClicker.enabled ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'"
+                    class="flex-1 py-3 border rounded-xl font-black italic uppercase tracking-tighter transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                    <i :data-lucide="autoClicker.enabled ? 'square' : 'play'" class="w-4 h-4"></i>
+                    <span x-text="autoClicker.enabled ? 'STOP_CLICKER' : 'START_CLICKER'"></span>
+                </button>
+            </div>
+
+            <!-- Info -->
+            <div class="p-3 bg-black/40 rounded-xl border border-white/5 space-y-2">
+                <div class="flex items-center justify-between text-[8px] font-mono uppercase tracking-widest">
+                    <span class="text-white/20">Hotkey:</span>
+                    <span class="text-amber-500/60">[Z]_Toggle</span>
+                </div>
+                <div class="flex items-center justify-between text-[8px] font-mono uppercase tracking-widest">
+                    <span class="text-white/20">Target:</span>
+                    <span class="text-white/40">Cursor_Position</span>
+                </div>
+                <p class="text-[7px] text-white/10 leading-tight">NOTE: CORS constraints apply to external games. Best used on local vault games.</p>
+            </div>
+        </div>
+    </div>
+
     <script>
         function arcadeApp() {
             return {
@@ -1498,7 +1570,7 @@
                         "title": "Basket Random",
                         "category": "Sports",
                         "description": "A fun, chaotic 2-player basketball game with random physics. Score baskets by jumping and swinging your arms in ever-changing environments!",
-                        "url": "basket-random.html",
+                        "url": "games/basket-random/index.html",
                         "thumbnail": "https://picsum.photos/seed/basket-random/400/300",
                         "source": "github.io"
                     },
@@ -1516,7 +1588,7 @@
                         "title": "Cookie Clicker",
                         "category": "Idle",
                         "description": "The legendary idle game! Bake as many cookies as humanly possible. Hire grandmas, build factories, and reach universal domination through the power of cookies.",
-                        "url": "cookie-clicker.html",
+                        "url": "games/cookie-clicker/index.html",
                         "thumbnail": "https://picsum.photos/seed/cookie/400/300",
                         "source": "script.google.com"
                     },
@@ -1525,7 +1597,7 @@
                         "title": "Quick-Draw",
                         "category": "Action",
                         "description": "The ultimate wild west reaction test. Progress through levels, buy upgrades, and survive the bandit onslaught in this upgraded arcade classic!",
-                        "url": "quick-draw.html",
+                        "url": "games/quick-draw/index.html",
                         "thumbnail": "https://picsum.photos/seed/quickdraw/400/300",
                         "source": "goldbar.net"
                     },
@@ -1543,7 +1615,7 @@
                         "title": "Pokemon Leaf Green",
                         "category": "Adventure",
                         "description": "Relive the classic GBA adventure! Capture, train, and battle Pokemon in the Kanto region in this enhanced remake of the original masterpiece.",
-                        "url": "pokemon-leaf-green.html",
+                        "url": "games/pokemon-leaf-green/index.html",
                         "thumbnail": "https://picsum.photos/seed/pokemon-leaf/400/300",
                         "source": "script.google.com"
                     },
@@ -1552,7 +1624,7 @@
                         "title": "Snow Rider 3D",
                         "category": "Racing",
                         "description": "Experience the pure thrill of a high-speed sled ride down a treacherous mountain! Dodge obstacles and collect gifts in this exhilarating 3D winter adventure.",
-                        "url": "snow-rider.html",
+                        "url": "games/snow-rider/index.html",
                         "thumbnail": "https://picsum.photos/seed/snowrider/400/300",
                         "source": "script.google.com"
                     },
@@ -1561,7 +1633,7 @@
                         "title": "Football Bros",
                         "category": "Sports",
                         "description": "A fast-paced, action-packed American football game. Dash, pass, and score touchdowns in this exciting sports arcade experience!",
-                        "url": "football-bros.html",
+                        "url": "games/football-bros/index.html",
                         "thumbnail": "https://picsum.photos/seed/football/400/300",
                         "source": "footballbros.io"
                     },
@@ -1570,7 +1642,7 @@
                         "title": "GunSpin",
                         "category": "Action",
                         "description": "Use a weapon's powerful recoil to propel it through the air! Manage your ammo, buy powerful upgrades, and see how far you can shoot your gun.",
-                        "url": "gunspin.html",
+                        "url": "games/gunspin/index.html",
                         "thumbnail": "https://picsum.photos/seed/gunspin/400/300",
                         "source": "classroom6x"
                     },
@@ -1872,7 +1944,21 @@
                         if (e.key === '\\') {
                             window.open(this.settings.panicUrl, '_blank');
                         }
+                        // Auto Clicker Hotkey: Z
+                        if (e.key.toLowerCase() === 'z' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                            if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                                this.autoClicker.toggle();
+                            }
+                        }
                     });
+
+                    // Mouse Tracking for Auto Clicker
+                    window.addEventListener('mousemove', (e) => {
+                        this.autoClicker.mouseX = e.clientX;
+                        this.autoClicker.mouseY = e.clientY;
+                        this.doDrag(e);
+                    });
+                    window.addEventListener('mouseup', () => this.stopDrag());
 
                     // Anti-Blocking: Tab Cloaking
                     this.$watch('profile.notes', (val) => {
@@ -2464,7 +2550,7 @@
 
                 getGameUrl(url) {
                     if (!url) return '';
-                    return url.startsWith('http') ? url : window.location.origin + '/' + url;
+                    return url;
                 },
 
                 async openGame(game) {
@@ -2500,7 +2586,7 @@
                             iframe.style.height = '100%';
                             
                             // Fix 404: Ensure absolute URL for local files in about:blank
-                            const absoluteUrl = game.url.startsWith('http') ? game.url : window.location.origin + '/' + game.url;
+                            const absoluteUrl = game.url.startsWith('http') ? game.url : new URL(game.url, window.location.href).href;
                             iframe.src = absoluteUrl;
                             
                             win.document.body.appendChild(iframe);
@@ -2549,6 +2635,75 @@
                     } else {
                         this.syncToFirestore({ exp: this.profile.exp });
                     }
+                },
+
+                autoClicker: {
+                    enabled: false,
+                    cps: 10,
+                    interval: null,
+                    showUI: false,
+                    mouseX: 0,
+                    mouseY: 0,
+                    pos: { x: 100, y: 100 },
+                    isDragging: false,
+                    dragStart: { x: 0, y: 0 },
+                    toggle() {
+                        if (this.enabled) {
+                            this.stop();
+                        } else {
+                            this.start();
+                        }
+                    },
+                    start() {
+                        if (this.enabled) return;
+                        this.enabled = true;
+                        const delay = 1000 / this.cps;
+                        this.interval = setInterval(() => {
+                            const el = document.elementFromPoint(this.mouseX, this.mouseY);
+                            if (el) {
+                                if (el.tagName === 'IFRAME') {
+                                    try {
+                                        const rect = el.getBoundingClientRect();
+                                        const innerX = this.mouseX - rect.left;
+                                        const innerY = this.mouseY - rect.top;
+                                        const innerEl = el.contentDocument.elementFromPoint(innerX, innerY);
+                                        if (innerEl) {
+                                            innerEl.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+                                            innerEl.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+                                            innerEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+                                        }
+                                    } catch (e) {
+                                        el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+                                    }
+                                } else {
+                                    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+                                    el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+                                    el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+                                }
+                            }
+                        }, delay);
+                    },
+                    stop() {
+                        this.enabled = false;
+                        clearInterval(this.interval);
+                        this.interval = null;
+                    }
+                },
+
+                startDrag(e) {
+                    if (e.target.closest('button') || e.target.closest('input')) return;
+                    this.autoClicker.isDragging = true;
+                    this.autoClicker.dragStart.x = e.clientX - this.autoClicker.pos.x;
+                    this.autoClicker.dragStart.y = e.clientY - this.autoClicker.pos.y;
+                },
+                doDrag(e) {
+                    if (this.autoClicker.isDragging) {
+                        this.autoClicker.pos.x = e.clientX - this.autoClicker.dragStart.x;
+                        this.autoClicker.pos.y = e.clientY - this.autoClicker.dragStart.y;
+                    }
+                },
+                stopDrag() {
+                    this.autoClicker.isDragging = false;
                 },
 
                 async updateRecentlyPlayed(game) {

@@ -4,7 +4,7 @@
     "title": "Basket Random",
     "category": "Sports",
     "description": "A fun, chaotic 2-player basketball game with random physics. Score baskets by jumping and swinging your arms in ever-changing environments!",
-    "url": "basket-random.html",
+    "url": "games/basket-random/index.html",
     "thumbnail": "https://picsum.photos/seed/basket-random/400/300",
     "source": "github.io"
   },
@@ -22,7 +22,7 @@
     "title": "Cookie Clicker",
     "category": "Idle",
     "description": "The legendary idle game! Bake as many cookies as humanly possible. Hire grandmas, build factories, and reach universal domination through the power of cookies.",
-    "url": "cookie-clicker.html",
+    "url": "games/cookie-clicker/index.html",
     "thumbnail": "https://picsum.photos/seed/cookie/400/300",
     "source": "script.google.com"
   },
@@ -31,7 +31,7 @@
     "title": "Quick-Draw",
     "category": "Action",
     "description": "The ultimate wild west reaction test. Progress through levels, buy upgrades, and survive the bandit onslaught in this upgraded arcade classic!",
-    "url": "quick-draw.html",
+    "url": "games/quick-draw/index.html",
     "thumbnail": "https://picsum.photos/seed/quickdraw/400/300",
     "source": "goldbar.net"
   },
@@ -49,7 +49,7 @@
     "title": "Pokemon Leaf Green",
     "category": "Adventure",
     "description": "Relive the classic GBA adventure! Capture, train, and battle Pokemon in the Kanto region in this enhanced remake of the original masterpiece.",
-    "url": "pokemon-leaf-green.html",
+    "url": "games/pokemon-leaf-green/index.html",
     "thumbnail": "https://picsum.photos/seed/pokemon-leaf/400/300",
     "source": "script.google.com"
   },
@@ -58,7 +58,7 @@
     "title": "Snow Rider 3D",
     "category": "Racing",
     "description": "Experience the pure thrill of a high-speed sled ride down a treacherous mountain! Dodge obstacles and collect gifts in this exhilarating 3D winter adventure.",
-    "url": "snow-rider.html",
+    "url": "games/snow-rider/index.html",
     "thumbnail": "https://picsum.photos/seed/snowrider/400/300",
     "source": "script.google.com"
   },
@@ -67,7 +67,7 @@
     "title": "Football Bros",
     "category": "Sports",
     "description": "A fast-paced, action-packed American football game. Dash, pass, and score touchdowns in this exciting sports arcade experience!",
-    "url": "football-bros.html",
+    "url": "games/football-bros/index.html",
     "thumbnail": "https://picsum.photos/seed/football/400/300",
     "source": "footballbros.io"
   },
@@ -76,7 +76,7 @@
     "title": "GunSpin",
     "category": "Action",
     "description": "Use a weapon's powerful recoil to propel it through the air! Manage your ammo, buy powerful upgrades, and see how far you can shoot your gun.",
-    "url": "gunspin.html",
+    "url": "games/gunspin/index.html",
     "thumbnail": "https://picsum.photos/seed/gunspin/400/300",
     "source": "classroom6x"
   },
