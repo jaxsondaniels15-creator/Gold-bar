@@ -591,6 +591,7 @@
                     </div>
                 </div>
 
+
                 <!-- Tabs -->
                 <div class="flex items-center gap-2 mb-5">
                     <button 
@@ -833,7 +834,7 @@
                             </button>
                             <iframe 
                                 x-ref="gameIframe"
-                                :src="selectedGame.url" 
+                                :src="getGameUrl(selectedGame.url)" 
                                 class="w-full h-full border-none"
                                 allow="accelerometer *; ambient-light-sensor *; autoplay *; camera *; clipboard-read *; clipboard-write *; encrypted-media *; fullscreen *; geolocation *; gyroscope *; local-network-access *; magnetometer *; microphone *; midi *; payment *; picture-in-picture *; screen-wake-lock *; speaker *; sync-xhr *; usb *; vibrate *; vr *; web-share *; pointer-lock *"
                                 :title="selectedGame.title"
@@ -2460,6 +2461,12 @@
                     setTimeout(() => this.toast.show = false, 5000);
                 },
 
+
+                getGameUrl(url) {
+                    if (!url) return '';
+                    return url.startsWith('http') ? url : window.location.origin + '/' + url;
+                },
+
                 async openGame(game) {
                     this.playSound('click');
                     this.modals.launch.game = game;
@@ -2491,7 +2498,11 @@
                             iframe.style.border = 'none';
                             iframe.style.width = '100%';
                             iframe.style.height = '100%';
-                            iframe.src = game.url;
+                            
+                            // Fix 404: Ensure absolute URL for local files in about:blank
+                            const absoluteUrl = game.url.startsWith('http') ? game.url : window.location.origin + '/' + game.url;
+                            iframe.src = absoluteUrl;
+                            
                             win.document.body.appendChild(iframe);
                             
                             if (this.settings.cloakMode) {
@@ -2520,7 +2531,7 @@
                             }
                         }
                     } else {
-                        window.open(game.url, '_blank');
+                        window.open(this.getGameUrl(game.url), '_blank');
                     }
                 },
 
