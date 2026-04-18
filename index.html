@@ -256,110 +256,6 @@
     <!-- Layout Wrapper -->
     <div class="flex h-screen w-full overflow-hidden">
         
-        <!-- Sidebar (Chat & Profile) -->
-        <aside class="w-72 border-r border-white/10 flex flex-col glass z-20">
-            <!-- User Profile Mini -->
-            <div class="p-4 border-b border-white/10">
-                    <div class="flex items-center gap-3">
-                        <div class="relative group cursor-pointer" @click="modals.profile = true">
-                            <img :src="profile.avatar" class="w-10 h-10 rounded-xl object-cover border border-white/20 group-hover:border-amber-500/50 transition-all">
-                            <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-black"></div>
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
-                                <i data-lucide="edit-2" class="w-3 h-3 text-white"></i>
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-center justify-between mb-0.5">
-                                <h3 class="font-bold text-xs tracking-tight" x-text="profile.name"></h3>
-                                <span class="text-[8px] font-mono text-amber-400 uppercase tracking-widest">LVL <span x-text="profile.level"></span></span>
-                            </div>
-                            <!-- Level Progress Bar -->
-                            <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden border border-white/10">
-                                <div class="h-full level-bar transition-all duration-1000" :style="{ width: (profile.exp || 0) + '%' }"></div>
-                            </div>
-                            <p class="text-[7px] font-mono text-white/20 uppercase tracking-widest mt-0.5">Arcade_Pro_Unit</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-2 mt-3">
-                        <button @click="modals.profile = true" class="flex-1 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-[8px] font-mono uppercase tracking-widest text-white/60">Profile</button>
-                        <button @click="logout()" class="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors group">
-                            <i data-lucide="log-out" class="w-3 h-3 text-white/40 group-hover:text-red-500"></i>
-                        </button>
-                    </div>
-            </div>
-
-            <!-- Chat Tabs -->
-            <div class="flex border-b border-white/10">
-                <button @click="chatTab = 'global'" :class="chatTab === 'global' ? 'border-amber-500 text-amber-400' : 'border-transparent text-white/40'" class="flex-1 py-2 text-[9px] font-mono uppercase tracking-widest border-b-2 transition-all">Global Chat</button>
-                <button @click="chatTab = 'requests'" :class="chatTab === 'requests' ? 'border-amber-500 text-amber-400' : 'border-transparent text-white/40'" class="flex-1 py-2 text-[9px] font-mono uppercase tracking-widest border-b-2 transition-all">Requests</button>
-                <button @click="chatTab = 'ai'" :class="chatTab === 'ai' ? 'border-amber-500 text-amber-400' : 'border-transparent text-white/40'" class="flex-1 py-2 text-[9px] font-mono uppercase tracking-widest border-b-2 transition-all flex items-center justify-center gap-1.5">
-                    AI Assistant
-                    <span class="w-1 h-1 bg-amber-500 rounded-full animate-pulse"></span>
-                </button>
-            </div>
-
-            <!-- Chat Content -->
-            <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar" x-ref="chatBox">
-                <template x-if="chatTab === 'global'">
-                    <template x-for="msg in messages" :key="msg.id">
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-bold text-amber-400" x-text="msg.userName"></span>
-                                <span class="text-[9px] text-white/20 font-mono" x-text="formatDateTime(msg.timestamp)"></span>
-                                <button @click="replyToMessage(msg.userName)" class="text-[9px] text-amber-500/50 hover:text-amber-500 transition-colors uppercase tracking-widest font-bold">Reply</button>
-                            </div>
-                            <p class="text-xs text-white/70 leading-relaxed" x-text="msg.text"></p>
-                        </div>
-                    </template>
-                </template>
-                <template x-if="chatTab === 'requests'">
-                    <template x-for="req in gameRequests" :key="req.id">
-                        <div class="p-3 bg-white/5 rounded-lg border border-white/5">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-[10px] font-bold text-amber-400" x-text="req.userName"></span>
-                                <span class="text-[9px] text-white/20 font-mono">REQUESTED</span>
-                                <button @click="replyToMessage(req.userName)" class="text-[9px] text-amber-500/50 hover:text-amber-500 transition-colors uppercase tracking-widest font-bold">Reply</button>
-                            </div>
-                            <p class="text-xs text-white/80 italic" x-text="req.text"></p>
-                        </div>
-                    </template>
-                </template>
-                <template x-if="chatTab === 'ai'">
-                    <div class="space-y-3">
-                        <template x-for="msg in aiMessages" :key="msg.id">
-                            <div class="space-y-1" :class="msg.role === 'user' ? 'text-right' : ''">
-                                <div class="flex items-center gap-2" :class="msg.role === 'user' ? 'justify-end' : ''">
-                                    <span class="text-[10px] font-bold" :class="msg.role === 'user' ? 'text-white/40' : 'text-amber-400'" x-text="msg.role === 'user' ? 'YOU' : 'GOLDBAR_AI'"></span>
-                                </div>
-                                <p class="text-xs leading-relaxed" :class="msg.role === 'user' ? 'text-white/60' : 'text-white/80'" x-text="msg.text"></p>
-                            </div>
-                        </template>
-                        <div x-show="aiLoading" class="flex items-center gap-2">
-                            <div class="w-1 h-1 bg-amber-400 rounded-full animate-bounce"></div>
-                            <div class="w-1 h-1 bg-amber-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                            <div class="w-1 h-1 bg-amber-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-                        </div>
-                    </div>
-                </template>
-            </div>
-
-            <!-- Chat Input -->
-            <div class="p-4 border-t border-white/10 bg-black/20">
-                <form @submit.prevent="sendMessage()" class="relative">
-                    <input 
-                        x-ref="chatInput"
-                        type="text" 
-                        x-model="newMessage" 
-                        :placeholder="chatTab === 'ai' ? 'Ask AI anything...' : 'Type a message...'"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-4 pr-10 text-xs focus:outline-none focus:border-amber-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                    <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:text-amber-400 transition-colors disabled:opacity-50">
-                        <i data-lucide="send" class="w-4 h-4"></i>
-                    </button>
-                </form>
-            </div>
-        </aside>
-
         <!-- Main Content Area -->
         <main class="flex-1 flex flex-col relative overflow-hidden">
             
@@ -397,12 +293,6 @@
                         <span class="text-[9px] font-bold uppercase tracking-widest">Random_Unit</span>
                     </button>
 
-                    <!-- Auto Clicker -->
-                    <button @click="autoClicker.showUI = !autoClicker.showUI" :class="autoClicker.showUI ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-white/5 text-white/40 border-white/10'" class="hidden md:flex items-center gap-2 px-4 py-1.5 border rounded-xl hover:bg-white/10 transition-all group">
-                        <i data-lucide="mouse-pointer-click" class="w-3 h-3 group-hover:scale-110 transition-transform"></i>
-                        <span class="text-[9px] font-bold uppercase tracking-widest">Auto_Clicker</span>
-                    </button>
-
                     <!-- Panic Key Indicator -->
                     <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
                         <span class="text-[9px] font-mono uppercase tracking-widest">Panic:</span>
@@ -424,20 +314,28 @@
                     <button @click="modals.settings = true" class="p-2.5 hover:bg-white/5 rounded-xl border border-white/10 transition-all group">
                         <i data-lucide="sliders" class="w-5 h-5 text-white/40 group-hover:text-amber-400"></i>
                     </button>
-                    <div class="h-8 w-[1px] bg-white/10"></div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
-                            <p class="text-xs font-bold" x-text="profile.name"></p>
-                            <p class="text-[9px] font-mono text-white/40 uppercase tracking-widest">Online Now</p>
+                    
+                    <div class="h-8 w-[1px] bg-white/10 mx-2"></div>
+                    
+                    <!-- Profile Button -->
+                    <button @click="modals.profile = true" class="flex items-center gap-3 pl-3 pr-4 py-1.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all group">
+                        <img :src="profile.avatar" class="w-7 h-7 rounded-lg border border-white/20 group-hover:border-amber-400 transition-all object-cover">
+                        <div class="text-left">
+                            <p class="text-[11px] font-black italic tracking-tight" x-text="profile.name"></p>
+                            <p class="text-[7px] font-mono text-white/40 uppercase tracking-widest">Arcade_Unit</p>
                         </div>
-                        <img :src="profile.avatar" class="w-10 h-10 rounded-lg object-cover border border-white/10">
-                    </div>
+                    </button>
+
+                    <!-- Logout -->
+                    <button @click="logout()" class="p-2 hover:bg-red-500/10 rounded-xl transition-all group" title="TERMINATE_SESSION">
+                        <i data-lucide="log-out" class="w-4 h-4 text-white/40 group-hover:text-red-500"></i>
+                    </button>
                 </div>
             </header>
 
             <!-- Category Pills -->
             <div class="px-6 py-3 border-b border-white/5 bg-black/20 flex items-center gap-2 overflow-x-auto custom-scrollbar">
-                <template x-for="tab in ['all', 'action', 'puzzle', 'sports', 'retro', 'strategy', 'youtube']">
+                <template x-for="tab in ['games', 'apps']">
                     <button 
                         @click="activeTab = tab"
                         class="px-4 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-widest transition-all border whitespace-nowrap"
@@ -601,20 +499,19 @@
                 <!-- Tabs -->
                 <div class="flex items-center gap-2 mb-5">
                     <button 
-                        @click="activeTab = 'all'"
-                        :class="activeTab === 'all' ? 'bg-amber-500 text-black font-bold' : 'bg-white/5 text-white/40 hover:text-white border border-white/5'"
+                        @click="activeTab = 'games'"
+                        :class="activeTab === 'games' ? 'bg-amber-500 text-black font-bold' : 'bg-white/5 text-white/40 hover:text-white border border-white/5'"
                         class="px-4 py-1 rounded-full text-[8px] font-mono uppercase tracking-widest transition-all"
                     >
-                        All_Units
+                        Games_Units
                     </button>
-                    <template x-for="category in uniqueCategories" :key="category">
-                        <button 
-                            @click="activeTab = category"
-                            :class="activeTab === category ? 'bg-amber-500 text-black font-bold' : 'bg-white/5 text-white/40 hover:text-white border border-white/5'"
-                            class="px-4 py-1 rounded-full text-[8px] font-mono uppercase tracking-widest transition-all"
-                            x-text="category"
-                        ></button>
-                    </template>
+                    <button 
+                        @click="activeTab = 'apps'"
+                        :class="activeTab === 'apps' ? 'bg-amber-500 text-black font-bold' : 'bg-white/5 text-white/40 hover:text-white border border-white/5'"
+                        class="px-4 py-1 rounded-full text-[8px] font-mono uppercase tracking-widest transition-all"
+                    >
+                        Apps_Units
+                    </button>
                 </div>
 
                 <!-- YouTube Section -->
@@ -1440,6 +1337,7 @@
                             <option value="IO" class="bg-zinc-900">IO</option>
                             <option value="Idle" class="bg-zinc-900">Idle</option>
                             <option value="Adventure" class="bg-zinc-900">Adventure</option>
+                            <option value="Apps" class="bg-zinc-900">Apps</option>
                         </select>
                     </div>
                 </div>
@@ -1488,72 +1386,6 @@
         </div>
     </div>
 
-    <!-- Floating Auto Clicker UI -->
-    <div 
-        x-show="autoClicker.showUI" 
-        x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0 scale-95"
-        x-transition:enter-end="opacity-100 scale-100"
-        class="fixed z-[100] w-64 glass border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
-        :style="{ left: autoClicker.pos.x + 'px', top: autoClicker.pos.y + 'px' }"
-        @mousedown="startDrag($event)"
-    >
-        <!-- Header -->
-        <div class="bg-white/5 p-3 flex items-center justify-between cursor-move border-b border-white/5">
-            <div class="flex items-center gap-2">
-                <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i>
-                <span class="text-[10px] font-black italic uppercase tracking-widest text-white/60">GOLDBAR_CLICKER_v1.0</span>
-            </div>
-            <button @click="autoClicker.showUI = false" class="p-1 hover:bg-red-500/20 rounded-lg transition-colors group">
-                <i data-lucide="x" class="w-3 h-3 text-white/20 group-hover:text-red-500"></i>
-            </button>
-        </div>
-
-        <!-- Body -->
-        <div class="p-4 space-y-4">
-            <!-- CPS Slider -->
-            <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                    <span class="text-[9px] font-mono text-white/40 uppercase tracking-widest">Clicks_Per_Second</span>
-                    <span class="text-xs font-black text-amber-400" x-text="autoClicker.cps"></span>
-                </div>
-                <input 
-                    type="range" 
-                    min="1" 
-                    max="50" 
-                    x-model="autoClicker.cps" 
-                    @change="if(autoClicker.enabled) { autoClicker.stop(); autoClicker.start(); }"
-                    class="w-full h-1.5 bg-white/5 rounded-full appearance-none cursor-pointer accent-amber-500"
-                >
-            </div>
-
-            <!-- Status & Controls -->
-            <div class="flex items-center gap-3">
-                <button 
-                    @click="autoClicker.toggle()" 
-                    :class="autoClicker.enabled ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'"
-                    class="flex-1 py-3 border rounded-xl font-black italic uppercase tracking-tighter transition-all active:scale-95 flex items-center justify-center gap-2"
-                >
-                    <i :data-lucide="autoClicker.enabled ? 'square' : 'play'" class="w-4 h-4"></i>
-                    <span x-text="autoClicker.enabled ? 'STOP_CLICKER' : 'START_CLICKER'"></span>
-                </button>
-            </div>
-
-            <!-- Info -->
-            <div class="p-3 bg-black/40 rounded-xl border border-white/5 space-y-2">
-                <div class="flex items-center justify-between text-[8px] font-mono uppercase tracking-widest">
-                    <span class="text-white/20">Hotkey:</span>
-                    <span class="text-amber-500/60">[Z]_Toggle</span>
-                </div>
-                <div class="flex items-center justify-between text-[8px] font-mono uppercase tracking-widest">
-                    <span class="text-white/20">Target:</span>
-                    <span class="text-white/40">Cursor_Position</span>
-                </div>
-                <p class="text-[7px] text-white/10 leading-tight">NOTE: CORS constraints apply to external games. Best used on local vault games.</p>
-            </div>
-        </div>
-    </div>
-
     <script>
         function arcadeApp() {
             return {
@@ -1566,15 +1398,6 @@
                 listenersActive: false,
                 games: [
                     {
-                        "id": "basket-random",
-                        "title": "Basket Random",
-                        "category": "Sports",
-                        "description": "A fun, chaotic 2-player basketball game with random physics. Score baskets by jumping and swinging your arms in ever-changing environments!",
-                        "url": "games/basket-random/index.html",
-                        "thumbnail": "https://picsum.photos/seed/basket-random/400/300",
-                        "source": "github.io"
-                    },
-                    {
                         "id": "bloxd-io",
                         "title": "Bloxd.io",
                         "category": "IO",
@@ -1584,24 +1407,6 @@
                         "source": "bloxd.io"
                     },
                     {
-                        "id": "cookie-clicker",
-                        "title": "Cookie Clicker",
-                        "category": "Idle",
-                        "description": "The legendary idle game! Bake as many cookies as humanly possible. Hire grandmas, build factories, and reach universal domination through the power of cookies.",
-                        "url": "games/cookie-clicker/index.html",
-                        "thumbnail": "https://picsum.photos/seed/cookie/400/300",
-                        "source": "script.google.com"
-                    },
-                    {
-                        "id": "quick-draw",
-                        "title": "Quick-Draw",
-                        "category": "Action",
-                        "description": "The ultimate wild west reaction test. Progress through levels, buy upgrades, and survive the bandit onslaught in this upgraded arcade classic!",
-                        "url": "games/quick-draw/index.html",
-                        "thumbnail": "https://picsum.photos/seed/quickdraw/400/300",
-                        "source": "goldbar.net"
-                    },
-                    {
                         "id": "retro-bowl",
                         "title": "Retro Bowl",
                         "category": "Sports",
@@ -1609,42 +1414,6 @@
                         "url": "https://freegamesunblocked76.github.io/retro-bowl/",
                         "thumbnail": "https://picsum.photos/seed/retro-bowl/400/300",
                         "source": "github.io"
-                    },
-                    {
-                        "id": "pokemon-leaf-green",
-                        "title": "Pokemon Leaf Green",
-                        "category": "Adventure",
-                        "description": "Relive the classic GBA adventure! Capture, train, and battle Pokemon in the Kanto region in this enhanced remake of the original masterpiece.",
-                        "url": "games/pokemon-leaf-green/index.html",
-                        "thumbnail": "https://picsum.photos/seed/pokemon-leaf/400/300",
-                        "source": "script.google.com"
-                    },
-                    {
-                        "id": "snow-rider",
-                        "title": "Snow Rider 3D",
-                        "category": "Racing",
-                        "description": "Experience the pure thrill of a high-speed sled ride down a treacherous mountain! Dodge obstacles and collect gifts in this exhilarating 3D winter adventure.",
-                        "url": "games/snow-rider/index.html",
-                        "thumbnail": "https://picsum.photos/seed/snowrider/400/300",
-                        "source": "script.google.com"
-                    },
-                    {
-                        "id": "football-bros",
-                        "title": "Football Bros",
-                        "category": "Sports",
-                        "description": "A fast-paced, action-packed American football game. Dash, pass, and score touchdowns in this exciting sports arcade experience!",
-                        "url": "games/football-bros/index.html",
-                        "thumbnail": "https://picsum.photos/seed/football/400/300",
-                        "source": "footballbros.io"
-                    },
-                    {
-                        "id": "gunspin",
-                        "title": "GunSpin",
-                        "category": "Action",
-                        "description": "Use a weapon's powerful recoil to propel it through the air! Manage your ammo, buy powerful upgrades, and see how far you can shoot your gun.",
-                        "url": "games/gunspin/index.html",
-                        "thumbnail": "https://picsum.photos/seed/gunspin/400/300",
-                        "source": "classroom6x"
                     },
                     {
                         "id": "slope",
@@ -1690,20 +1459,156 @@
                         "url": "https://gibbat2.github.io/Games/games/getaway-shootout/",
                         "thumbnail": "https://picsum.photos/seed/getaway/400/300",
                         "source": "gibbat2.github.io"
+                    },
+                    {
+                        "id": "10-minutes-till-dawn",
+                        "title": "10 Minutes Till Dawn",
+                        "category": "Action",
+                        "description": "Fight off an ever-growing horde of monsters to survive the night for 10 minutes in this roguelike survival game.",
+                        "url": "https://truffled.lol/games/10minutestilldawn/index.html",
+                        "thumbnail": "https://picsum.photos/seed/dawn/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "pokemon-emerald",
+                        "title": "Pokemon Emerald",
+                        "category": "Adventure",
+                        "description": "The classic Pokemon Emerald adventure. Train your Pokemon and become a legend, hosted on Truffled.",
+                        "url": "https://truffled.lol/gamefile/em.html",
+                        "thumbnail": "https://picsum.photos/seed/pokemon/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "pokemon-blue",
+                        "title": "Pokemon Blue",
+                        "category": "Adventure",
+                        "description": "The classic Pokemon Blue adventure. Start your journey in Kanto, hosted on Truffled.",
+                        "url": "https://truffled.lol/gamefile/blue.html",
+                        "thumbnail": "https://picsum.photos/seed/pokemonblue/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "pokemon-red",
+                        "title": "Pokemon Red",
+                        "category": "Adventure",
+                        "description": "The classic Pokemon Red adventure. Catch 'em all in Kanto, hosted on Truffled.",
+                        "url": "https://truffled.lol/gamefile/red.html",
+                        "thumbnail": "https://picsum.photos/seed/pokemonred/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "snow-rider-3d",
+                        "title": "Snow Rider 3D",
+                        "category": "Racing",
+                        "description": "A thrilling 3D bobsleigh game where you slide down the slopes, dodging obstacles and collecting presents.",
+                        "url": "https://truffled.lol/games/snowrider3D-main/index.html",
+                        "thumbnail": "https://picsum.photos/seed/snowrider/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "pokemon-crystal",
+                        "title": "Pokemon Crystal",
+                        "category": "Adventure",
+                        "description": "The classic Pokemon Crystal adventure on Game Boy Color, now playable on Truffled.",
+                        "url": "https://truffled.lol/gamefile/blob.html",
+                        "thumbnail": "https://picsum.photos/seed/pokemoncrystal/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "gta-1",
+                        "title": "Grand Theft Auto 1",
+                        "category": "Action",
+                        "description": "The original top-down GTA that started it all. Complete missions and cause chaos in the city.",
+                        "url": "https://truffled.lol/games/gta/index.html",
+                        "thumbnail": "https://picsum.photos/seed/gta1/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "gta-2",
+                        "title": "Grand Theft Auto 2",
+                        "category": "Action",
+                        "description": "The sequel to the original top-down action game with improved graphics and gameplay mechanics.",
+                        "url": "https://truffled.lol/games/gta2/index.html",
+                        "thumbnail": "https://picsum.photos/seed/gta2/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "gta-3",
+                        "title": "Grand Theft Auto 3",
+                        "category": "Action",
+                        "description": "The revolutionary open-world adventure that redefined the series for a new generation.",
+                        "url": "https://truffled.lol/games/gta3/index.html",
+                        "thumbnail": "https://picsum.photos/seed/gta3/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "gta-san-andreas",
+                        "title": "GTA: San Andreas",
+                        "category": "Action",
+                        "description": "Return to Los Santos in this massive open-world epic. One of the most beloved games in the series.",
+                        "url": "https://truffled.lol/games/gtasan/index.html",
+                        "thumbnail": "https://picsum.photos/seed/gtasan/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "gta-vice-city",
+                        "title": "GTA: Vice City",
+                        "category": "Action",
+                        "description": "Experience the 80s in Vice City. A neon-soaked adventure full of crime and action.",
+                        "url": "https://truffled.lol/games/vicecity/index.html",
+                        "thumbnail": "https://picsum.photos/seed/gtavice/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "superhot",
+                        "title": "Superhot",
+                        "category": "Action",
+                        "description": "Time only moves when you move. A unique and stylish first-person shooter.",
+                        "url": "https://truffled.lol/games/superhot/index.html",
+                        "thumbnail": "https://picsum.photos/seed/superhot/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "pokemon-gold",
+                        "title": "Pokemon Gold",
+                        "category": "Adventure",
+                        "description": "The original Johto adventure in color. Discover 100 new Pokemon, hosted on Truffled.",
+                        "url": "https://truffled.lol/gamefile/gold.html",
+                        "thumbnail": "https://picsum.photos/seed/pokemon-gold/400/300",
+                        "source": "truffled.lol"
+                    },
+                    {
+                        "id": "goldbar-ai",
+                        "title": "GoldBar AI",
+                        "category": "Apps",
+                        "description": "Your virtual companion for arcade navigation, gaming tips, and general queries. Redone for peak performance.",
+                        "url": "/apps/ai/index.html",
+                        "thumbnail": "https://picsum.photos/seed/ai-bot/400/300",
+                        "source": "Internal"
+                    },
+                    {
+                        "id": "community-chat",
+                        "title": "Community Chat",
+                        "category": "Apps",
+                        "description": "Connect with other GoldBar units in real-time. Share strategies and hang out.",
+                        "url": "/apps/chat/index.html",
+                        "thumbnail": "https://picsum.photos/seed/chat-room/400/300",
+                        "source": "Internal"
+                    },
+                    {
+                        "id": "game-requests",
+                        "title": "Game Requests",
+                        "category": "Apps",
+                        "description": "Found a game you love? Submit your transmission here for the GOLDBAR operators to review.",
+                        "url": "/apps/requests/index.html",
+                        "thumbnail": "https://picsum.photos/seed/request-box/400/300",
+                        "source": "Internal"
                     }
                 ],
                 searchQuery: '',
                 selectedGame: null,
-                activeTab: 'all',
-                chatTab: 'global',
-                newMessage: '',
-                messages: [],
-                gameRequests: [],
+                activeTab: 'games',
                 gameRatings: {},
-                aiMessages: [
-                    { id: 1, role: 'assistant', text: 'HELLO_UNIT. I AM GOLDBAR_AI. HOW CAN I ASSIST YOU TODAY?' }
-                ],
-                aiLoading: false,
                 
                 admin: {
                     stats: {
@@ -1944,21 +1849,7 @@
                         if (e.key === '\\') {
                             window.open(this.settings.panicUrl, '_blank');
                         }
-                        // Auto Clicker Hotkey: Z
-                        if (e.key.toLowerCase() === 'z' && !e.ctrlKey && !e.altKey && !e.metaKey) {
-                            if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-                                this.autoClicker.toggle();
-                            }
-                        }
                     });
-
-                    // Mouse Tracking for Auto Clicker
-                    window.addEventListener('mousemove', (e) => {
-                        this.autoClicker.mouseX = e.clientX;
-                        this.autoClicker.mouseY = e.clientY;
-                        this.doDrag(e);
-                    });
-                    window.addEventListener('mouseup', () => this.stopDrag());
 
                     // Anti-Blocking: Tab Cloaking
                     this.$watch('profile.notes', (val) => {
@@ -2316,22 +2207,7 @@
                     if (this.listenersActive || !this.db) return;
                     this.listenersActive = true;
                     
-                    // Chat Messages
-                    const messagesPath = 'messages';
-                    const qMessages = window.GoldBarFirestore.query(
-                        window.GoldBarFirestore.collection(this.db, messagesPath),
-                        window.GoldBarFirestore.orderBy('timestamp', 'asc')
-                    );
-                    window.GoldBarFirestore.onSnapshot(qMessages, (snapshot) => {
-                        const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        this.messages = all.filter(m => m.type === 'chat');
-                        this.gameRequests = all.filter(m => m.type === 'request');
-                        this.scrollToBottom();
-                    }, (error) => {
-                        this.handleFirestoreError(error, 'get', messagesPath);
-                    });
-
-                    // Ratings
+                    // Ratings listener only
                     const ratingsPath = 'ratings';
                     window.GoldBarFirestore.onSnapshot(window.GoldBarFirestore.collection(this.db, ratingsPath), (snapshot) => {
                         const ratings = {};
@@ -2346,15 +2222,12 @@
                     });
                 },
 
-                get uniqueCategories() {
-                    const categories = this.games.map(g => g.category).filter(Boolean);
-                    return [...new Set(categories)].sort();
-                },
-
                 get filteredGames() {
                     let filtered = this.games;
-                    if (this.activeTab !== 'all') {
-                        filtered = filtered.filter(game => game.category === this.activeTab);
+                    if (this.activeTab === 'games') {
+                        filtered = filtered.filter(game => game.category?.toLowerCase() !== 'apps');
+                    } else if (this.activeTab === 'apps') {
+                        filtered = filtered.filter(game => game.category?.toLowerCase() === 'apps');
                     }
                     if (this.searchQuery) {
                         const query = this.searchQuery.toLowerCase();
@@ -2413,6 +2286,37 @@
                     });
                 },
 
+                async saveProfile() {
+                    if (!this.user) return;
+                    const path = `users/${this.user.uid}`;
+                    try {
+                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
+                        await window.GoldBarFirestore.updateDoc(userRef, {
+                            name: this.profile.name,
+                            avatar: this.profile.avatar
+                        });
+                        this.modals.profile = false;
+                    } catch (e) {
+                        this.handleFirestoreError(e, 'update', path);
+                    }
+                },
+
+                async unlockAchievement(id) {
+                    if (!this.user || this.hasAchievement(id)) return;
+                    const newAchievements = [...this.profile.achievements, id];
+                    this.profile.achievements = newAchievements;
+                    this.syncToFirestore({ achievements: newAchievements });
+                    const ach = this.allAchievements.find(a => a.id === id);
+                    if (ach) {
+                        this.showToast(ach.name, ach.icon);
+                        this.gainExp(20);
+                    }
+                },
+
+                hasAchievement(id) {
+                    return this.profile.achievements.includes(id);
+                },
+
                 isFavorite(id) {
                     return this.profile.favorites?.includes(id);
                 },
@@ -2443,103 +2347,6 @@
                     if (label) {
                         this.updateGameControl(gameId, label, 'KEY');
                     }
-                },
-
-                async sendMessage() {
-                    if (!this.newMessage.trim()) return;
-                    
-                    if (this.chatTab === 'ai') {
-                        await this.sendAiMessage();
-                        return;
-                    }
-
-                    const path = 'messages';
-                    try {
-                        await window.GoldBarFirestore.addDoc(window.GoldBarFirestore.collection(this.db, path), {
-                            userId: this.user ? this.user.uid : 'guest',
-                            userName: this.user ? this.profile.name : 'Guest User',
-                            text: this.newMessage,
-                            type: this.chatTab === 'requests' ? 'request' : 'chat',
-                            timestamp: window.GoldBarFirestore.serverTimestamp()
-                        });
-                        this.newMessage = '';
-                        this.unlockAchievement('chat_active');
-                    } catch (e) {
-                        this.handleFirestoreError(e, 'create', path);
-                    }
-                },
-
-                async sendAiMessage() {
-                    const userMsg = this.newMessage.trim();
-                    this.newMessage = '';
-                    
-                    this.aiMessages.push({
-                        id: Date.now(),
-                        role: 'user',
-                        text: userMsg
-                    });
-                    
-                    this.aiLoading = true;
-                    this.$nextTick(() => {
-                        this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight;
-                    });
-                    
-                    try {
-                        const response = await window.GoldBarAI.generateResponse(userMsg);
-                        this.aiMessages.push({
-                            id: Date.now() + 1,
-                            role: 'assistant',
-                            text: response
-                        });
-                    } catch (e) {
-                        console.error("AI Error:", e);
-                        this.aiMessages.push({
-                            id: Date.now() + 1,
-                            role: 'assistant',
-                            text: "ERROR_COMMUNICATING_WITH_CORE. PLEASE_TRY_AGAIN_LATER."
-                        });
-                    } finally {
-                        this.aiLoading = false;
-                        this.$nextTick(() => {
-                            this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight;
-                        });
-                    }
-                },
-
-                replyToMessage(userName) {
-                    this.newMessage = `@${userName} ${this.newMessage}`;
-                    this.$refs.chatInput.focus();
-                },
-
-                async saveProfile() {
-                    if (!this.user) return;
-                    const path = `users/${this.user.uid}`;
-                    try {
-                        const userRef = window.GoldBarFirestore.doc(this.db, 'users', this.user.uid);
-                        await window.GoldBarFirestore.updateDoc(userRef, {
-                            name: this.profile.name,
-                            avatar: this.profile.avatar
-                        });
-                        this.modals.profile = false;
-                    } catch (e) {
-                        this.handleFirestoreError(e, 'update', path);
-                    }
-                },
-
-                async unlockAchievement(id) {
-                    if (!this.user || this.hasAchievement(id)) return;
-                    const newAchievements = [...this.profile.achievements, id];
-                    this.profile.achievements = newAchievements;
-                    this.syncToFirestore({ achievements: newAchievements });
-                    const ach = this.allAchievements.find(a => a.id === id);
-                    if (ach) {
-                        this.showToast(ach.name, ach.icon);
-                        this.gainExp(20);
-                    }
-                },
-
-                hasAchievement(id) {
-                    return this.profile.achievements.includes(id);
                 },
 
                 showToast(title, icon) {
@@ -2635,75 +2442,6 @@
                     } else {
                         this.syncToFirestore({ exp: this.profile.exp });
                     }
-                },
-
-                autoClicker: {
-                    enabled: false,
-                    cps: 10,
-                    interval: null,
-                    showUI: false,
-                    mouseX: 0,
-                    mouseY: 0,
-                    pos: { x: 100, y: 100 },
-                    isDragging: false,
-                    dragStart: { x: 0, y: 0 },
-                    toggle() {
-                        if (this.enabled) {
-                            this.stop();
-                        } else {
-                            this.start();
-                        }
-                    },
-                    start() {
-                        if (this.enabled) return;
-                        this.enabled = true;
-                        const delay = 1000 / this.cps;
-                        this.interval = setInterval(() => {
-                            const el = document.elementFromPoint(this.mouseX, this.mouseY);
-                            if (el) {
-                                if (el.tagName === 'IFRAME') {
-                                    try {
-                                        const rect = el.getBoundingClientRect();
-                                        const innerX = this.mouseX - rect.left;
-                                        const innerY = this.mouseY - rect.top;
-                                        const innerEl = el.contentDocument.elementFromPoint(innerX, innerY);
-                                        if (innerEl) {
-                                            innerEl.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-                                            innerEl.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
-                                            innerEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-                                        }
-                                    } catch (e) {
-                                        el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-                                    }
-                                } else {
-                                    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-                                    el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
-                                    el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-                                }
-                            }
-                        }, delay);
-                    },
-                    stop() {
-                        this.enabled = false;
-                        clearInterval(this.interval);
-                        this.interval = null;
-                    }
-                },
-
-                startDrag(e) {
-                    if (e.target.closest('button') || e.target.closest('input')) return;
-                    this.autoClicker.isDragging = true;
-                    this.autoClicker.dragStart.x = e.clientX - this.autoClicker.pos.x;
-                    this.autoClicker.dragStart.y = e.clientY - this.autoClicker.pos.y;
-                },
-                doDrag(e) {
-                    if (this.autoClicker.isDragging) {
-                        this.autoClicker.pos.x = e.clientX - this.autoClicker.dragStart.x;
-                        this.autoClicker.pos.y = e.clientY - this.autoClicker.dragStart.y;
-                    }
-                },
-                stopDrag() {
-                    this.autoClicker.isDragging = false;
                 },
 
                 async updateRecentlyPlayed(game) {

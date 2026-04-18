@@ -1,14 +1,5 @@
 [
   {
-    "id": "basket-random",
-    "title": "Basket Random",
-    "category": "Sports",
-    "description": "A fun, chaotic 2-player basketball game with random physics. Score baskets by jumping and swinging your arms in ever-changing environments!",
-    "url": "games/basket-random/index.html",
-    "thumbnail": "https://picsum.photos/seed/basket-random/400/300",
-    "source": "github.io"
-  },
-  {
     "id": "bloxd-io",
     "title": "Bloxd.io",
     "category": "IO",
@@ -18,24 +9,6 @@
     "source": "bloxd.io"
   },
   {
-    "id": "cookie-clicker",
-    "title": "Cookie Clicker",
-    "category": "Idle",
-    "description": "The legendary idle game! Bake as many cookies as humanly possible. Hire grandmas, build factories, and reach universal domination through the power of cookies.",
-    "url": "games/cookie-clicker/index.html",
-    "thumbnail": "https://picsum.photos/seed/cookie/400/300",
-    "source": "script.google.com"
-  },
-  {
-    "id": "quick-draw",
-    "title": "Quick-Draw",
-    "category": "Action",
-    "description": "The ultimate wild west reaction test. Progress through levels, buy upgrades, and survive the bandit onslaught in this upgraded arcade classic!",
-    "url": "games/quick-draw/index.html",
-    "thumbnail": "https://picsum.photos/seed/quickdraw/400/300",
-    "source": "goldbar.net"
-  },
-  {
     "id": "retro-bowl",
     "title": "Retro Bowl",
     "category": "Sports",
@@ -43,42 +16,6 @@
     "url": "https://freegamesunblocked76.github.io/retro-bowl/",
     "thumbnail": "https://picsum.photos/seed/retro-bowl/400/300",
     "source": "github.io"
-  },
-  {
-    "id": "pokemon-leaf-green",
-    "title": "Pokemon Leaf Green",
-    "category": "Adventure",
-    "description": "Relive the classic GBA adventure! Capture, train, and battle Pokemon in the Kanto region in this enhanced remake of the original masterpiece.",
-    "url": "games/pokemon-leaf-green/index.html",
-    "thumbnail": "https://picsum.photos/seed/pokemon-leaf/400/300",
-    "source": "script.google.com"
-  },
-  {
-    "id": "snow-rider",
-    "title": "Snow Rider 3D",
-    "category": "Racing",
-    "description": "Experience the pure thrill of a high-speed sled ride down a treacherous mountain! Dodge obstacles and collect gifts in this exhilarating 3D winter adventure.",
-    "url": "games/snow-rider/index.html",
-    "thumbnail": "https://picsum.photos/seed/snowrider/400/300",
-    "source": "script.google.com"
-  },
-  {
-    "id": "football-bros",
-    "title": "Football Bros",
-    "category": "Sports",
-    "description": "A fast-paced, action-packed American football game. Dash, pass, and score touchdowns in this exciting sports arcade experience!",
-    "url": "games/football-bros/index.html",
-    "thumbnail": "https://picsum.photos/seed/football/400/300",
-    "source": "footballbros.io"
-  },
-  {
-    "id": "gunspin",
-    "title": "GunSpin",
-    "category": "Action",
-    "description": "Use a weapon's powerful recoil to propel it through the air! Manage your ammo, buy powerful upgrades, and see how far you can shoot your gun.",
-    "url": "games/gunspin/index.html",
-    "thumbnail": "https://picsum.photos/seed/gunspin/400/300",
-    "source": "classroom6x"
   },
   {
     "id": "slope",
@@ -124,5 +61,149 @@
     "url": "https://gibbat2.github.io/Games/games/getaway-shootout/",
     "thumbnail": "https://picsum.photos/seed/getaway/400/300",
     "source": "gibbat2.github.io"
+  },
+  {
+    "id": "10-minutes-till-dawn",
+    "title": "10 Minutes Till Dawn",
+    "category": "Action",
+    "description": "Fight off an ever-growing horde of monsters to survive the night for 10 minutes in this roguelike survival game.",
+    "url": "https://truffled.lol/games/10minutestilldawn/index.html",
+    "thumbnail": "https://picsum.photos/seed/dawn/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "pokemon-emerald",
+    "title": "Pokemon Emerald",
+    "category": "Adventure",
+    "description": "The classic Pokemon Emerald adventure. Train your Pokemon and become a legend, hosted on Truffled.",
+    "url": "https://truffled.lol/gamefile/em.html",
+    "thumbnail": "https://picsum.photos/seed/pokemon/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "pokemon-blue",
+    "title": "Pokemon Blue",
+    "category": "Adventure",
+    "description": "The classic Pokemon Blue adventure. Start your journey in Kanto, hosted on Truffled.",
+    "url": "https://truffled.lol/gamefile/blue.html",
+    "thumbnail": "https://picsum.photos/seed/pokemonblue/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "pokemon-red",
+    "title": "Pokemon Red",
+    "category": "Adventure",
+    "description": "The classic Pokemon Red adventure. Catch 'em all in Kanto, hosted on Truffled.",
+    "url": "https://truffled.lol/gamefile/red.html",
+    "thumbnail": "https://picsum.photos/seed/pokemonred/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "snow-rider-3d",
+    "title": "Snow Rider 3D",
+    "category": "Racing",
+    "description": "A thrilling 3D bobsleigh game where you slide down the slopes, dodging obstacles and collecting presents.",
+    "url": "https://truffled.lol/games/snowrider3D-main/index.html",
+    "thumbnail": "https://picsum.photos/seed/snowrider/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "pokemon-crystal",
+    "title": "Pokemon Crystal",
+    "category": "Adventure",
+    "description": "The classic Pokemon Crystal adventure on Game Boy Color, now playable on Truffled.",
+    "url": "https://truffled.lol/gamefile/blob.html",
+    "thumbnail": "https://picsum.photos/seed/pokemoncrystal/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "gta-1",
+    "title": "Grand Theft Auto 1",
+    "category": "Action",
+    "description": "The original top-down GTA that started it all. Complete missions and cause chaos in the city.",
+    "url": "https://truffled.lol/games/gta/index.html",
+    "thumbnail": "https://picsum.photos/seed/gta1/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "gta-2",
+    "title": "Grand Theft Auto 2",
+    "category": "Action",
+    "description": "The sequel to the original top-down action game with improved graphics and gameplay mechanics.",
+    "url": "https://truffled.lol/games/gta2/index.html",
+    "thumbnail": "https://picsum.photos/seed/gta2/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "gta-3",
+    "title": "Grand Theft Auto 3",
+    "category": "Action",
+    "description": "The revolutionary open-world adventure that redefined the series for a new generation.",
+    "url": "https://truffled.lol/games/gta3/index.html",
+    "thumbnail": "https://picsum.photos/seed/gta3/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "gta-san-andreas",
+    "title": "GTA: San Andreas",
+    "category": "Action",
+    "description": "Return to Los Santos in this massive open-world epic. One of the most beloved games in the series.",
+    "url": "https://truffled.lol/games/gtasan/index.html",
+    "thumbnail": "https://picsum.photos/seed/gtasan/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "gta-vice-city",
+    "title": "GTA: Vice City",
+    "category": "Action",
+    "description": "Experience the 80s in Vice City. A neon-soaked adventure full of crime and action.",
+    "url": "https://truffled.lol/games/vicecity/index.html",
+    "thumbnail": "https://picsum.photos/seed/gtavice/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "superhot",
+    "title": "Superhot",
+    "category": "Action",
+    "description": "Time only moves when you move. A unique and stylish first-person shooter.",
+    "url": "https://truffled.lol/games/superhot/index.html",
+    "thumbnail": "https://picsum.photos/seed/superhot/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "pokemon-gold",
+    "title": "Pokemon Gold",
+    "category": "Adventure",
+    "description": "The original Johto adventure in color. Discover 100 new Pokemon, hosted on Truffled.",
+    "url": "https://truffled.lol/gamefile/gold.html",
+    "thumbnail": "https://picsum.photos/seed/pokemon-gold/400/300",
+    "source": "truffled.lol"
+  },
+  {
+    "id": "goldbar-ai",
+    "title": "GoldBar AI",
+    "category": "Apps",
+    "description": "Your virtual companion for arcade navigation, gaming tips, and general queries. Redone for peak performance.",
+    "url": "/apps/ai/index.html",
+    "thumbnail": "https://picsum.photos/seed/ai-bot/400/300",
+    "source": "Internal"
+  },
+  {
+    "id": "community-chat",
+    "title": "Community Chat",
+    "category": "Apps",
+    "description": "Connect with other GoldBar units in real-time. Share strategies and hang out.",
+    "url": "/apps/chat/index.html",
+    "thumbnail": "https://picsum.photos/seed/chat-room/400/300",
+    "source": "Internal"
+  },
+  {
+    "id": "game-requests",
+    "title": "Game Requests",
+    "category": "Apps",
+    "description": "Found a game you love? Submit your transmission here for the GOLDBAR operators to review.",
+    "url": "/apps/requests/index.html",
+    "thumbnail": "https://picsum.photos/seed/request-box/400/300",
+    "source": "Internal"
   }
 ]
